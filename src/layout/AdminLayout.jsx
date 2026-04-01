@@ -1,213 +1,147 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router';
-import { useAuth } from '../hooks/useAuth';
-import {
-  LayoutDashboard,
-  Monitor,
-  LogOut,
-  Menu,
-  X,
-  ChevronRight,
+import React, { useState } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router';
+import { 
+  LayoutDashboard, 
+  PlusCircle, 
+  LogOut, 
+  Menu, 
+  X, 
+  ChevronRight, 
   Zap,
+  Bell,
+  Settings
 } from 'lucide-react';
-import toast from 'react-hot-toast';
-
-const NAV_ITEMS = [
-  {
-    label: 'Dashboard',
-    path: '/',
-    icon: LayoutDashboard,
-  },
-];
+import { useAuth } from '../hooks/useAuth';
+import ScrollToTop from '../Components/utility/ScrollToTop';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+  const navItems = [
+    { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { label: 'Create Totem', path: '/totem/new', icon: PlusCircle },
+  ];
 
-  // Close sidebar when clicking outside (mobile)
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (sidebarOpen && sidebarRef.current && !sidebarRef.current.contains(e.target)) {
-        setSidebarOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [sidebarOpen]);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast.success('Logged out successfully');
-      navigate('/login');
-    } catch {
-      toast.error('Logout failed');
-    }
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
-
-  // Generate breadcrumbs from path
-  const getBreadcrumbs = () => {
-    const paths = location.pathname.split('/').filter(Boolean);
-    if (paths.length === 0) return [{ label: 'Dashboard', path: '/' }];
-
-    const crumbs = [{ label: 'Dashboard', path: '/' }];
-    let accumulated = '';
-    paths.forEach((segment) => {
-      accumulated += `/${segment}`;
-      const label = segment === 'totem'
-        ? 'Totems'
-        : segment === 'new'
-        ? 'Create New'
-        : segment.charAt(0).toUpperCase() + segment.slice(1);
-      crumbs.push({ label, path: accumulated });
-    });
-    return crumbs;
-  };
-
-  const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className="flex h-screen bg-surface-950 overflow-hidden">
-      {/* ── Mobile Overlay ── */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
+    <div className="flex min-h-screen bg-surface-50">
+      <ScrollToTop />
+      
+      {/* Mobile Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-surface-900/10 backdrop-blur-sm lg:hidden" 
+          onClick={() => setIsSidebarOpen(false)} 
         />
       )}
 
-      {/* ── Sidebar ── */}
-      <aside
-        ref={sidebarRef}
-        className={`
-          fixed lg:static inset-y-0 left-0 z-50
-          w-[260px] bg-surface-900 border-r border-surface-800
-          flex flex-col transition-transform duration-300 ease-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}
-      >
-        {/* Logo */}
-        <div className="flex items-center gap-3 px-5 h-16 border-b border-surface-800 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-600/20">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-base font-bold text-surface-100 leading-tight">
-              Totem<span className="text-brand-400">Hub</span>
-            </h1>
-            <p className="text-[10px] text-surface-500 font-medium uppercase tracking-wider">
-              Management
-            </p>
-          </div>
-          {/* Close btn (mobile) */}
-          <button
-            onClick={() => setSidebarOpen(false)}
-            className="ml-auto p-1.5 rounded-lg hover:bg-surface-800 text-surface-400
-                       lg:hidden transition-colors cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <p className="px-3 mb-2 text-[10px] font-semibold text-surface-500 uppercase tracking-widest">
-            Main
-          </p>
-          {NAV_ITEMS.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                 transition-all duration-200 group
-                 ${
-                   isActive
-                     ? 'bg-brand-600/15 text-brand-400 shadow-sm'
-                     : 'text-surface-400 hover:text-surface-200 hover:bg-surface-800/60'
-                 }
-                `
-              }
-            >
-              <item.icon className="w-[18px] h-[18px] shrink-0" />
-              <span>{item.label}</span>
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* User Footer */}
-        <div className="px-3 py-3 border-t border-surface-800 shrink-0">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-surface-800/40">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
-              {user?.name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || 'A'}
+      {/* --- SIDEBAR --- */}
+      <aside className={`
+        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-surface-200 shadow-sm transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-y-auto
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
+        <div className="flex flex-col h-full">
+          {/* Logo Area */}
+          <div className="p-8 flex items-center gap-3 border-b border-surface-100">
+            <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
+              <Zap className="w-5 h-5 text-white" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-surface-200 truncate">
-                {user?.name || 'Admin'}
-              </p>
-              <p className="text-[11px] text-surface-500 truncate">
-                {user?.email || 'admin@totemhub.io'}
-              </p>
+            <div>
+              <h1 className="text-xl font-black text-surface-900 tracking-tight leading-none uppercase">TotemHub</h1>
+              <p className="text-[10px] font-bold text-surface-400 tracking-widest leading-none mt-1 uppercase">Management</p>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`
+                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative
+                    ${isActive 
+                      ? 'bg-brand-50 text-brand-600' 
+                      : 'text-surface-500 hover:bg-surface-50 hover:text-surface-900'}
+                  `}
+                >
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-surface-400 group-hover:text-surface-600'}`} />
+                  <span className="font-bold tracking-tight">{item.label}</span>
+                  {isActive && (
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-l-full bg-brand-500" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Section */}
+          <div className="p-6 border-t border-surface-100 space-y-4">
+            <div className="flex items-center gap-3 px-3 py-3 bg-surface-50 rounded-xl border border-surface-200/50">
+              <div className="w-10 h-10 rounded-full bg-brand-100 flex items-center justify-center text-brand-600 font-black text-sm border-2 border-white shadow-sm">
+                {user?.name?.charAt(0) || 'A'}
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <p className="text-xs font-black text-surface-900 truncate">Senior Admin</p>
+                <p className="text-[10px] text-surface-400 font-bold truncate tracking-tight">{user?.email || 'admin@totem.com'}</p>
+              </div>
             </div>
             <button
               onClick={handleLogout}
-              title="Logout"
-              className="p-1.5 rounded-lg hover:bg-surface-700 text-surface-500
-                         hover:text-danger-400 transition-colors cursor-pointer shrink-0"
+              className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl transition-all group font-bold tracking-tight"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span>Sign Out</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* ── Main Content ── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* --- MAIN CONTENT --- */}
+      <main className="flex-1 flex flex-col min-w-0 min-h-screen">
         {/* Topbar */}
-        <header className="h-16 bg-surface-900/80 backdrop-blur-md border-b border-surface-800 flex items-center px-4 lg:px-6 gap-4 shrink-0 z-30">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-xl hover:bg-surface-800 text-surface-400
-                       lg:hidden transition-colors cursor-pointer"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+        <header className="h-16 bg-white/80 backdrop-blur-md border-b border-surface-200 flex items-center justify-between px-6 sticky top-0 z-30">
+          <div className="flex items-center gap-4">
+            <button 
+              className="lg:hidden p-2 hover:bg-surface-100 rounded-lg transition-colors" 
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu className="w-6 h-6 text-surface-600" />
+            </button>
 
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1 text-sm overflow-x-auto">
-            {breadcrumbs.map((crumb, i) => (
-              <React.Fragment key={crumb.path}>
-                {i > 0 && (
-                  <ChevronRight className="w-3.5 h-3.5 text-surface-600 shrink-0" />
-                )}
-                <span
-                  className={`whitespace-nowrap ${
-                    i === breadcrumbs.length - 1
-                      ? 'text-surface-200 font-medium'
-                      : 'text-surface-500'
-                  }`}
-                >
-                  {crumb.label}
-                </span>
-              </React.Fragment>
-            ))}
-          </nav>
+            <nav className="hidden sm:flex items-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
+              <Link to="/" className="hover:text-brand-600 transition-colors">TotemHub</Link>
+              <ChevronRight className="w-3.5 h-3.5" />
+              <span className="text-surface-900">{location.pathname === '/' ? 'Dashboard' : 'Management'}</span>
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="p-2 text-surface-400 hover:text-surface-900 hover:bg-surface-50 rounded-lg transition-all relative">
+              <Bell className="w-5 h-5" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+            <button className="p-2 text-surface-400 hover:text-surface-900 hover:bg-surface-50 rounded-lg transition-all">
+              <Settings className="w-5 h-5" />
+            </button>
+          </div>
         </header>
 
-        {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        {/* Content Area */}
+        <section className="flex-1 p-4 lg:p-10">
           <Outlet />
-        </main>
-      </div>
+        </section>
+      </main>
     </div>
   );
 };

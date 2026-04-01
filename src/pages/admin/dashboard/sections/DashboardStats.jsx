@@ -1,66 +1,54 @@
 import React from 'react';
-import { Monitor, Video, ShoppingBag, Activity } from 'lucide-react';
+import { Layers, Activity, Video, ShoppingBag } from 'lucide-react';
 
-/**
- * Dashboard stats section: displays summary metrics at the top.
- */
-const STAT_CARDS = [
-  {
-    key: 'totalTotems',
-    label: 'Total Totems',
-    icon: Monitor,
-    color: 'from-brand-500/15 to-brand-700/5',
-    iconColor: 'text-brand-400',
-    borderColor: 'border-brand-500/20',
-  },
-  {
-    key: 'activeDevices',
-    label: 'Active Devices',
-    icon: Activity,
-    color: 'from-success-500/15 to-success-600/5',
-    iconColor: 'text-success-500',
-    borderColor: 'border-success-500/20',
-  },
-  {
-    key: 'totalVideos',
-    label: 'Total Videos',
-    icon: Video,
-    color: 'from-warning-500/15 to-warning-600/5',
-    iconColor: 'text-warning-500',
-    borderColor: 'border-warning-500/20',
-  },
-  {
-    key: 'totalProducts',
-    label: 'Total Products',
-    icon: ShoppingBag,
-    color: 'from-brand-300/15 to-brand-400/5',
-    iconColor: 'text-brand-300',
-    borderColor: 'border-brand-300/20',
-  },
-];
+const StatCard = ({ label, value, icon: Icon, colorClass }) => (
+  <div className="bg-white p-6 rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-all animate-in flex items-center justify-between group">
+    <div className="space-y-1">
+      <p className="text-[10px] font-black text-surface-400 uppercase tracking-widest leading-none group-hover:text-surface-900 transition-colors">
+        {label}
+      </p>
+      <p className="text-3xl font-black text-surface-900 leading-none tabular-nums">
+        {value}
+      </p>
+    </div>
+    <div className={`p-3 rounded-xl ${colorClass} bg-opacity-10 text-opacity-100 flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg shadow-brand-500/5`}>
+      <Icon className="w-6 h-6 " />
+    </div>
+  </div>
+);
 
-const DashboardStats = ({ stats = {} }) => {
+const DashboardStats = ({ totems = [] }) => {
+  const stats = [
+    {
+      label: 'Total Totems',
+      value: totems.length,
+      icon: Layers,
+      colorClass: 'bg-brand-500 text-brand-600',
+    },
+    {
+      label: 'Active Partners',
+      value: new Set(totems.map((t) => t.user?.email || t.partnerEmail).filter(Boolean)).size,
+      icon: Activity,
+      colorClass: 'bg-green-500 text-green-600',
+    },
+    {
+      label: 'Total Videos',
+      value: totems.reduce((acc, t) => acc + (t.videoCount || 0), 0),
+      icon: Video,
+      colorClass: 'bg-amber-500 text-amber-600',
+    },
+    {
+      label: 'Showcase Items',
+      value: totems.reduce((acc, t) => acc + (t.productCount || 0), 0),
+      icon: ShoppingBag,
+      colorClass: 'bg-indigo-500 text-indigo-600',
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
-      {STAT_CARDS.map((card, i) => (
-        <div
-          key={card.key}
-          className={`glass-card rounded-2xl p-4 lg:p-5 animate-fade-in`}
-          style={{ animationDelay: `${i * 80}ms` }}
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div
-              className={`w-10 h-10 rounded-xl bg-gradient-to-br ${card.color}
-                          border ${card.borderColor} flex items-center justify-center`}
-            >
-              <card.icon className={`w-5 h-5 ${card.iconColor}`} />
-            </div>
-          </div>
-          <p className="text-2xl lg:text-3xl font-bold text-surface-100 mb-0.5">
-            {stats[card.key] ?? 0}
-          </p>
-          <p className="text-xs text-surface-500 font-medium">{card.label}</p>
-        </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, i) => (
+        <StatCard key={i} {...stat} />
       ))}
     </div>
   );

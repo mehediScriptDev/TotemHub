@@ -1,71 +1,127 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { Monitor, Trash2, ExternalLink, Mail } from 'lucide-react';
+import { 
+  Trash2, 
+  ChevronRight, 
+  Video, 
+  ShoppingBag, 
+  Activity, 
+  ExternalLink,
+  Layers,
+  MapPin
+} from 'lucide-react';
+import { Button, ConfirmDialog } from '../../../../Components/ui';
+import { totemService } from '../../../../services/totemService';
+import { toast } from 'react-hot-toast';
 
-/**
- * Individual totem card displayed on the Dashboard grid.
- */
-const TotemCard = ({ totem, onDelete, index }) => {
+const TotemCard = ({ totem, onDeleted }) => {
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      setDeleting(true);
+      await totemService.delete(totem.id);
+      toast.success('Totem deleted');
+      onDeleted?.();
+    } catch (error) {
+      toast.error('Failed to delete');
+    } finally {
+      setDeleting(false);
+      setShowConfirm(false);
+    }
+  };
 
   return (
-    <div
-      className="group glass-card rounded-2xl p-5 hover:border-brand-500/30
-                 transition-all duration-300 cursor-pointer animate-fade-in"
-      style={{ animationDelay: `${index * 60}ms` }}
-      onClick={() => navigate(`/totem/${totem.id}`)}
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-700/10 border border-brand-500/20 flex items-center justify-center">
-          <Monitor className="w-5 h-5 text-brand-400" />
-        </div>
-        <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(totem);
-            }}
-            title="Delete Totem"
-            className="p-2 rounded-lg hover:bg-danger-600/15 text-surface-500
-                       hover:text-danger-400 transition-all cursor-pointer"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-          <div className="p-2 rounded-lg hover:bg-surface-700 text-surface-500 hover:text-surface-200 transition-all">
-            <ExternalLink className="w-4 h-4" />
+    <div className="card-premium group relative animate-in overflow-hidden shadow-sm hover:shadow-md border border-surface-200">
+      {/* Accent Header */}
+      <div className="h-1.5 w-full bg-brand-500/20 group-hover:bg-brand-500 transition-all" />
+      
+      <div className="p-5 flex flex-col h-full">
+        <div className="flex justify-between items-start mb-6">
+          <div className="space-y-1">
+            <h3 className="font-black text-lg text-surface-900 group-hover:text-brand-600 transition-colors leading-tight">
+              {totem.name || 'Unnamed Totem'}
+            </h3>
+            <div className="flex flex-wrap gap-2 items-center">
+              <p className="text-[10px] text-surface-400 font-black tracking-widest uppercase flex items-center gap-1.5">
+                STORE ID: {totem.id_store}
+              </p>
+              {totem.user?.business_type && (
+                <span className="text-[9px] px-2 py-0.5 bg-brand-50 text-brand-600 font-black rounded-md uppercase tracking-tighter border border-brand-100">
+                  {totem.user.business_type}
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+              title="Delete Totem"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Name */}
-      <h3 className="text-base font-semibold text-surface-100 mb-1 truncate group-hover:text-brand-300 transition-colors">
-        {totem.name}
-      </h3>
-
-      {/* Partner Email */}
-      <div className="flex items-center gap-1.5 text-surface-500 mb-4">
-        <Mail className="w-3.5 h-3.5 shrink-0" />
-        <span className="text-xs truncate">{totem.partnerEmail}</span>
-      </div>
-
-      {/* Stats Row */}
-      <div className="flex items-center gap-3 pt-3 border-t border-surface-700/50">
-        <div className="flex items-center gap-1.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-success-500 animate-pulse-dot" />
-          <span className="text-xs text-surface-400">Active</span>
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <div className="bg-surface-50 p-3 rounded-xl border border-surface-200/50">
+            <div className="flex items-center gap-2 text-surface-400 mb-1">
+              <Video className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-widest">Media</span>
+            </div>
+            <p className="text-xl font-black text-surface-900 leading-none">
+              {(totem.videoCount !== undefined) ? totem.videoCount : '—'}
+            </p>
+          </div>
+          <div className="bg-surface-50 p-3 rounded-xl border border-surface-200/50">
+            <div className="flex items-center gap-2 text-surface-400 mb-1">
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-black uppercase tracking-widest">Items</span>
+            </div>
+            <p className="text-xl font-black text-surface-900 leading-none">
+              {(totem.productCount !== undefined) ? totem.productCount : '—'}
+            </p>
+          </div>
         </div>
-        {totem.videoCount !== undefined && (
-          <span className="text-xs text-surface-500">
-            {totem.videoCount} video{totem.videoCount !== 1 ? 's' : ''}
-          </span>
-        )}
-        {totem.productCount !== undefined && (
-          <span className="text-xs text-surface-500">
-            {totem.productCount} product{totem.productCount !== 1 ? 's' : ''}
-          </span>
-        )}
+
+        <div className="mt-auto pt-4 border-t border-surface-100 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-7 h-7 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-black text-surface-500 shrink-0 border border-white shadow-sm uppercase">
+              {totem.user?.first_name?.charAt(0) || 'P'}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-[11px] font-black text-surface-900 truncate uppercase tracking-tight">
+                {totem.user?.first_name} {totem.user?.last_name}
+              </p>
+              <p className="text-[9px] font-bold text-surface-400 truncate tracking-tighter">
+                {totem.user?.email}
+              </p>
+            </div>
+          </div>
+          
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            className="text-brand-600 hover:bg-brand-50 !px-2 group"
+            onClick={() => navigate(`/totem/${totem.id}`)}
+          >
+            Manage <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+          </Button>
+        </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete Totem"
+        description={`Permanently remove "${totem.name}"? This action is irreversible.`}
+        confirmLabel={deleting ? 'Deleting...' : 'Delete'}
+        variant="danger"
+      />
     </div>
   );
 };

@@ -1,83 +1,87 @@
 /**
- * db.js - A LocalStorage-based Temporary Database
- * This manages persistent demo data for Totems, Products, and Videos.
+ * db.js - Real Data Synchronized Database
  */
 
 const KEYS = {
   TOTEMS: 'totemhub_db_totems',
   PRODUCTS: 'totemhub_db_products',
   VIDEOS: 'totemhub_db_videos',
-  INITIALIZED: 'totemhub_db_initialized'
+  INITIALIZED: 'totemhub_v2_init' // Changed version to force re-init
 };
 
-// --- INITIAL MOCK DATA ---
-const INITIAL_TOTEMS = [
-  { id: 't1', name: 'Main Entrance Kiosk', partnerEmail: 'partner@example.com', videoCount: 3, productCount: 4 },
-  { id: 't2', name: 'Food Court Totem', partnerEmail: 'vendor@mall.com', videoCount: 1, productCount: 2 },
-  { id: 't3', name: 'Parking Level 1', partnerEmail: 'info@parking.com', videoCount: 0, productCount: 0 },
-];
-
-const INITIAL_PRODUCTS = [
-  { id: 'p1', name: 'Premium Headphones', category: 'Electronics', price: 199.99, status: 'active', image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop' },
-  { id: 'p2', name: 'Smart Watch', category: 'Electronics', price: 149.50, status: 'active', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop' },
-  { id: 'p3', name: 'Leather Wallet', category: 'Accessories', price: 45.00, status: 'active', image: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=200&h=200&fit=crop' },
-  { id: 'p4', name: 'Water Bottle', category: 'Lifestyle', price: 25.00, status: 'active', image: 'https://images.unsplash.com/photo-1602143399827-bd9aa9673bc3?w=200&h=200&fit=crop' },
-];
-
-const INITIAL_VIDEOS = [
-  { id: 'v1', totemId: 't1', filename: 'Welcome_Loop.mp4', category: 'rotating', size: 45000000, thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=200&h=150&fit=crop' },
-  { id: 'v2', totemId: 't1', filename: 'Product_Showcase.mp4', category: 'rotating', size: 120000000, thumbnail: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=200&h=150&fit=crop' },
-  { id: 'v3', totemId: 't1', filename: 'Idle_Screen_Saver.mp4', category: 'idle', size: 85000000, thumbnail: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=200&h=150&fit=crop' },
+// --- REAL DATA FROM YOUR BACKEND ---
+const REAL_TOTEMS = [
+  {
+    "id": 6,
+    "id_store": 87,
+    "name": "Fierro",
+    "user": { "first_name": "Franco", "last_name": "Fierro", "email": "info@francofierro.com", "business_type": "Partner Finanziario" }
+  },
+  {
+    "id": 7,
+    "id_store": 280,
+    "name": "Test",
+    "user": { "first_name": "test", "last_name": "test", "email": "scrapscercanegozio@gmail.com", "business_type": "Negozio" }
+  },
+  {
+    "id": 10,
+    "id_store": 257,
+    "name": "Zupo Vito",
+    "user": { "first_name": "Vito", "last_name": "Zupo", "email": "zuporappresentanze@live.it", "business_type": "Negozio" }
+  },
+  {
+    "id": 11,
+    "id_store": 420,
+    "name": "75'' Gins Battipaglia",
+    "user": { "first_name": "Paolo", "last_name": "D auria", "email": "gcouture1974@gmail.com", "business_type": "Negozio" }
+  },
+  {
+    "id": 12,
+    "id_store": 416,
+    "name": "Eboli - InfoLudica",
+    "user": { "first_name": "Madianna", "last_name": "De rosa", "email": "infoludicaboutique@gmail.com", "business_type": "Negozio" }
+  },
+  {
+    "id": 13,
+    "id_store": 420,
+    "name": "65'' Gins Battipaglia",
+    "user": { "first_name": "Paolo", "last_name": "D auria", "email": "gcouture1974@gmail.com", "business_type": "Negozio" }
+  },
+  {
+    "id": 14,
+    "id_store": 640,
+    "name": "86'' Cacciapuoti Villaricca",
+    "user": { "first_name": "Filippo", "last_name": "Cacciapuoti", "email": "boutiquecacciapuoti@gmail.com", "business_type": "Negozio" }
+  },
+  {
+    "id": 15,
+    "id_store": 656,
+    "name": "86'' Riccione",
+    "user": { "first_name": "Alina", "last_name": "Ciuprina", "email": "ac@miogroup.it", "business_type": "Negozio" }
+  }
 ];
 
 // --- DB ENGINE ---
 export const db = {
   init: () => {
     if (!localStorage.getItem(KEYS.INITIALIZED)) {
-      localStorage.setItem(KEYS.TOTEMS, JSON.stringify(INITIAL_TOTEMS));
-      localStorage.setItem(KEYS.PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
-      localStorage.setItem(KEYS.VIDEOS, JSON.stringify(INITIAL_VIDEOS));
+      localStorage.setItem(KEYS.TOTEMS, JSON.stringify(REAL_TOTEMS));
       localStorage.setItem(KEYS.INITIALIZED, 'true');
     }
   },
 
-  // TOTEMS
   getTotems: () => JSON.parse(localStorage.getItem(KEYS.TOTEMS) || '[]'),
-  getTotemById: (id) => db.getTotems().find(t => t.id === id),
+  getTotemById: (id) => db.getTotems().find(t => t.id == id),
   saveTotem: (totem) => {
     const totems = db.getTotems();
-    const newTotem = { ...totem, id: totem.id || 't_' + Date.now(), videoCount: 0, productCount: 0 };
+    const newTotem = { ...totem, id: Date.now(), videoCount: 0, productCount: 0 };
     localStorage.setItem(KEYS.TOTEMS, JSON.stringify([newTotem, ...totems]));
     return newTotem;
   },
   deleteTotem: (id) => {
-    const totems = db.getTotems().filter(t => t.id !== id);
+    const totems = db.getTotems().filter(t => t.id != id);
     localStorage.setItem(KEYS.TOTEMS, JSON.stringify(totems));
-  },
-
-  // PRODUCTS
-  getCatalog: () => JSON.parse(localStorage.getItem(KEYS.PRODUCTS) || '[]'),
-  getTotemProducts: (totemId) => {
-    // For demo, we'll store mapping in a separate key if needed, or just return first 2
-    return db.getCatalog().slice(0, 3);
-  },
-
-  // VIDEOS
-  getVideos: (totemId) => {
-    const all = JSON.parse(localStorage.getItem(KEYS.VIDEOS) || '[]');
-    return all.filter(v => v.totemId === totemId || !v.totemId);
-  },
-  saveVideo: (video) => {
-    const all = JSON.parse(localStorage.getItem(KEYS.VIDEOS) || '[]');
-    const newVideo = { ...video, id: 'v_' + Date.now() };
-    localStorage.setItem(KEYS.VIDEOS, JSON.stringify([newVideo, ...all]));
-    return newVideo;
-  },
-  deleteVideo: (id) => {
-    const all = JSON.parse(localStorage.getItem(KEYS.VIDEOS) || '[]').filter(v => v.id !== id);
-    localStorage.setItem(KEYS.VIDEOS, JSON.stringify(all));
   }
 };
 
-// Initialize on load
 db.init();

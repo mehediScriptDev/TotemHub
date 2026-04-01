@@ -1,46 +1,56 @@
-import { db } from '../utils/db';
+import axiosInstance from './axiosInstance';
 
 /**
- * Video Service (Perfect Demo Edition)
- * Simulates video uploads and persistence with localStorage.
+ * Video Service (Client API Edition)
+ * Handles element_id=1 (Idle) and element_id=2 (Rotating/Slides)
  */
 export const videoService = {
   /** Fetch all videos for a totem */
   getTotemVideos: async (totemId) => {
-    return new Promise((resolve) => setTimeout(() => resolve(db.getVideos(totemId)), 250));
+    try {
+      const [idleRes, rotatingRes] = await Promise.all([
+        axiosInstance.get(`/${totemId}/video-idle`),
+        axiosInstance.get(`/${totemId}/slides`)
+      ]);
+      
+      return [
+        ...(Array.isArray(idleRes.data) ? idleRes.data.map(v => ({ ...v, category: 'idle' })) : []),
+        ...(Array.isArray(rotatingRes.data) ? rotatingRes.data.map(v => ({ ...v, category: 'rotating' })) : [])
+      ];
+    } catch (e) { return []; }
   },
 
-  /** Simulates upload with progress and persistence */
+  /** Upload a video with specific file name and totem_id */
   upload: async (totemId, file, category = 'rotating', onUploadProgress) => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        if (onUploadProgress) onUploadProgress({ loaded: progress, total: 100 });
-        if (progress >= 100) {
-          clearInterval(interval);
-          const newVideo = db.saveVideo({ totemId, filename: file.name, category, size: file.size, thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=200&h=150&fit=crop' });
-          resolve({ success: true, video: newVideo });
-        }
-      }, 200);
-    });
+    const formData = new FormData();
+    formData.append('totem_id', totemId);
+    formData.append('name', file.name);
+    formData.append('file', file);
+
+    const endpoint = category === 'idle' ? '/video-idle' : '/slides';
+    
+    try {
+      const response = await axiosInstance.post(endpoint, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (progressEvent) => {
+          if (onUploadProgress) {
+            onUploadProgress({
+                loaded: progressEvent.loaded,
+                total: progressEvent.total
+            });
+          }
+        },
+      });
+      return response.data;
+    } catch (error) { throw error; }
   },
 
-  /** Update video details */
-  update: async (totemId, videoId, data) => {
-    return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 250));
-  },
-
-  /** Remove video */
-  delete: async (totemId, videoId) => {
-    return new Promise((resolve) => {
-      db.deleteVideo(videoId);
-      setTimeout(() => resolve({ success: true }), 300);
-    });
-  },
-
-  /** Reorder rotators */
-  reorder: async (totemId, videoIds) => {
-    return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 300));
+  /** Delete a specific slide/idle video */
+  delete: async (videoId, category = 'rotating') => {
+    const endpoint = category === 'idle' ? '/video-idle' : '/slides';
+    try {
+      const response = await axiosInstance.delete(`${endpoint}/${videoId}`);
+      return response.data;
+    } catch (error) { throw error; }
   },
 };

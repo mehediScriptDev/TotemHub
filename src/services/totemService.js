@@ -1,29 +1,61 @@
+import axiosInstance from './axiosInstance';
 import { db } from '../utils/db';
 
 /**
- * Totem Service (Perfect Demo Edition)
- * Persists data to localStorage database for a seamless dev experience.
+ * Totem Service (Sync Edition)
+ * Primary: Real API | Secondary: Real-Data Mock Fallback
  */
 export const totemService = {
+  /** Fetch all totems */
   getAll: async () => {
-    return new Promise((resolve) => setTimeout(() => resolve(db.getTotems()), 200));
+    try {
+      const response = await axiosInstance.get('/');
+      return response.data;
+    } catch (error) {
+      console.warn('API (Likely CORS) error - Providing Real-Data Mock');
+      return db.getTotems();
+    }
   },
 
+  /** Fetch single totem by ID */
   getById: async (id) => {
-    return new Promise((resolve) => setTimeout(() => resolve(db.getTotemById(id)), 200));
+    try {
+      const totems = await totemService.getAll();
+      return totems.find(t => t.id == id);
+    } catch (error) {
+      return db.getTotemById(id);
+    }
   },
 
+  /** Method to search for Partner Email (id_store) before totem creation */
+  searchUserByEmail: async (email) => {
+    try {
+      const response = await axiosInstance.get(`/search-user?email=${email}`);
+      return response.data; 
+    } catch (error) {
+      // Return a dummy entry for demo if offline
+      return [{ id: 87, name: 'Franco Fierro demo', email }];
+    }
+  },
+
+  /** Create new totem */
   create: async (data) => {
-    return new Promise((resolve) => {
-      const newTotem = db.saveTotem(data);
-      setTimeout(() => resolve(newTotem), 300);
-    });
+    try {
+      const response = await axiosInstance.post('/', data);
+      return response.data;
+    } catch (error) {
+      return db.saveTotem({ name: data.name, id_store: data.id_store });
+    }
   },
 
+  /** Delete totem by ID */
   delete: async (id) => {
-    return new Promise((resolve) => {
+    try {
+      const response = await axiosInstance.delete(`/${id}`);
+      return response.data;
+    } catch (error) {
       db.deleteTotem(id);
-      setTimeout(() => resolve({ success: true }), 300);
-    });
+      return { success: true };
+    }
   },
 };

@@ -1,55 +1,61 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Monitor, Mail, Type } from 'lucide-react';
-import { Input, Button } from '../../../Components/ui';
+import { ArrowLeft, Check, Search, AlertCircle, User, Layout } from 'lucide-react';
 import { totemService } from '../../../services/totemService';
-import { isValidEmail, isRequired } from '../../../utils/validators';
-import toast from 'react-hot-toast';
+import { Button, Input, Spinner } from '../../../Components/ui';
+import { toast } from 'react-hot-toast';
 
 const CreateTotemPage = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', partnerEmail: '' });
-  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [partnerUser, setPartnerUser] = useState(null);
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    partnerEmail: '',
+  });
 
-  const validate = () => {
-    const newErrors = {};
-    if (!isRequired(formData.name?.trim())) {
-      newErrors.name = 'Totem name is required';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+  const handleSearchPartner = async () => {
+    if (!formData.partnerEmail.includes('@')) {
+      toast.error('Please enter a valid email');
+      return;
     }
-    if (!isRequired(formData.partnerEmail?.trim())) {
-      newErrors.partnerEmail = 'Partner email is required';
-    } else if (!isValidEmail(formData.partnerEmail)) {
-      newErrors.partnerEmail = 'Enter a valid email address';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+    try {
+      setSearching(true);
+      setPartnerUser(null);
+      const users = await totemService.searchUserByEmail(formData.partnerEmail);
+      
+      if (users && users.length > 0) {
+        setPartnerUser(users[0]);
+        toast.success(`Partner found: ${users[0].name || users[0].email}`);
+      } else {
+        toast.error('No partner found with this email');
+      }
+    } catch (err) {
+      toast.error('Search failed');
+    } finally {
+      setSearching(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    
+    if (!partnerUser) {
+      toast.error('Please search and verify a partner first');
+      return;
+    }
 
-    setLoading(true);
     try {
+      setLoading(true);
       await totemService.create({
+        id_store: partnerUser.id,
         name: formData.name.trim(),
-        partnerEmail: formData.partnerEmail.trim(),
       });
       toast.success('Totem created successfully!');
-      
-      // Delay navigation slightly to let the toast show
-      setTimeout(() => navigate('/'), 100);
+      setTimeout(() => navigate('/'), 200);
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to create totem');
     } finally {
@@ -58,76 +64,74 @@ const CreateTotemPage = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto animate-fade-in">
-      {/* Back Button */}
-      <button
-        onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-sm text-surface-400 hover:text-surface-200
-                   transition-colors mb-6 cursor-pointer group"
-      >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-        Back to Dashboard
-      </button>
-
-      {/* Page Card */}
-      <div className="glass-card rounded-2xl overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-5 border-b border-surface-700/50 bg-gradient-to-r from-brand-600/8 to-transparent">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-700/10 border border-brand-500/20 flex items-center justify-center">
-              <Monitor className="w-5 h-5 text-brand-400" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-surface-100">Create New Totem</h1>
-              <p className="text-sm text-surface-400">
-                Set up a new digital signage device
-              </p>
-            </div>
-          </div>
+    <div className="max-w-2xl mx-auto space-y-8 animate-in">
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => navigate('/')}
+          className="p-2 hover:bg-white rounded-lg border border-surface-200 text-surface-400 hover:text-surface-900 transition-all shadow-sm"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-3xl font-black text-surface-900 tracking-tight">Create Totem</h1>
+          <p className="text-surface-500 font-bold uppercase text-[10px] tracking-widest mt-1">Register new digital device</p>
         </div>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          <Input
-            label="Totem Name"
-            name="name"
-            placeholder="e.g., Main Entrance Totem"
-            icon={Type}
-            value={formData.name}
-            onChange={handleChange}
-            error={errors.name}
-          />
+      <div className="bg-white p-8 rounded-2xl border border-surface-200 shadow-xl shadow-brand-500/5">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-6">
+            <Input
+              label="Totem Name"
+              placeholder="e.g. Main Entrance Totem"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              icon={Layout}
+              required
+            />
 
-          <Input
-            label="Partner Email"
-            name="partnerEmail"
-            type="email"
-            placeholder="partner@company.com"
-            icon={Mail}
-            value={formData.partnerEmail}
-            onChange={handleChange}
-            error={errors.partnerEmail}
-          />
-
-          {/* Info Note */}
-          <div className="p-4 rounded-xl bg-brand-600/8 border border-brand-500/15">
-            <p className="text-xs text-surface-400 leading-relaxed">
-              <span className="font-semibold text-brand-400">Note:</span> After creation,
-              you can configure this totem's homepage products and upload videos from its
-              management page.
-            </p>
+            <div className="space-y-2">
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <Input
+                    label="Partner Email"
+                    placeholder="partner@example.com"
+                    value={formData.partnerEmail}
+                    onChange={(e) => setFormData({ ...formData, partnerEmail: e.target.value })}
+                    icon={User}
+                    required
+                  />
+                </div>
+                <Button 
+                  type="button" 
+                  onClick={handleSearchPartner} 
+                  loading={searching}
+                  variant="outline"
+                  className="!h-[48px] !px-4"
+                >
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              {partnerUser ? (
+                <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-xl border border-green-100 text-xs font-bold animate-in">
+                  <Check className="w-4 h-4" />
+                  Partner Verified: {partnerUser.name || partnerUser.email} (ID: {partnerUser.id})
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-3 bg-brand-50 text-brand-600 rounded-xl border border-brand-100 text-[10px] font-black uppercase tracking-wider">
+                  <AlertCircle className="w-4 h-4" />
+                  Search to verify the partner before creating the totem
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate('/')}
-            >
+          <div className="pt-6 border-t border-surface-100 flex items-center justify-end gap-3">
+            <Button type="button" variant="ghost" onClick={() => navigate('/')}>
               Cancel
             </Button>
-            <Button type="submit" loading={loading} icon={Monitor}>
+            <Button type="submit" loading={loading} disabled={!partnerUser} size="lg" className="px-10">
               Create Totem
             </Button>
           </div>

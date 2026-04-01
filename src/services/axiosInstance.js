@@ -1,39 +1,22 @@
 import axios from 'axios';
-import { API_CONFIG } from '../config/constants';
-import { getToken } from '../utils/storage';
 
 const axiosInstance = axios.create({
-  baseURL: API_CONFIG.BASE_URL,
-  timeout: 5000,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://api.psicopatici.com/api/totems',
+  timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Request interceptor
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = getToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
+/**
+ * Handle auth injection (client token management)
+ */
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('totemhub_session_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
-
-// Response interceptor - Only for non-error responses
-// Error handling is delegated to apiExecutor for Redux thunks
-axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    // Pass through errors without handling - let apiExecutor handle them
-    return Promise.reject(error);
-  }
-);
+  return config;
+});
 
 export default axiosInstance;
