@@ -19,7 +19,8 @@ const DashboardPage = () => {
     try {
       setLoading(true);
       const data = await totemService.getAll();
-      setTotems(data?.totems || data || []);
+      const totemList = Array.isArray(data) ? data : data?.totems || [];
+      setTotems(totemList);
     } catch (err) {
       toast.error('Failed to load totems');
       console.error(err);

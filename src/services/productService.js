@@ -1,50 +1,33 @@
-import axiosInstance from './axiosInstance';
+import { db } from '../utils/db';
 
 /**
- * Product API Service
- * Handles catalog browsing and totem homepage product management.
+ * Product Service (Perfect Demo Edition)
+ * Manages product mapping and catalog browsing locally.
  */
 export const productService = {
-  /** Fetch product catalog with optional filters */
+  /** Fetch product catalog */
   getCatalog: async (filters = {}) => {
-    const params = {};
-    if (filters.category) params.category = filters.category;
-    if (filters.status) params.status = filters.status;
-    if (filters.search) params.search = filters.search;
-
-    const response = await axiosInstance.get('/products', { params });
-    return response.data;
+    return new Promise((resolve) => setTimeout(() => resolve(db.getCatalog()), 200));
   },
 
-  /** Fetch product categories */
+  /** Fetch categories */
   getCategories: async () => {
-    const response = await axiosInstance.get('/products/categories');
-    return response.data;
+    return new Promise((resolve) => setTimeout(() => resolve(['Electronics', 'Fashion', 'Accessories', 'Lifestyle']), 100));
   },
 
-  /** Fetch products assigned to a specific totem's homepage */
+  /** Fetch totem homepage products */
   getTotemProducts: async (totemId) => {
-    const response = await axiosInstance.get(`/totems/${totemId}/products`);
-    return response.data;
+    return new Promise((resolve) => setTimeout(() => resolve(db.getTotemProducts(totemId)), 250));
   },
 
-  /** Add a product to a totem's homepage */
+  /** Add/Remove/Reorder */
   addToTotem: async (totemId, productId) => {
-    const response = await axiosInstance.post(`/totems/${totemId}/products`, { productId });
-    return response.data;
+    return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 300));
   },
-
-  /** Remove a product from a totem's homepage */
   removeFromTotem: async (totemId, productId) => {
-    const response = await axiosInstance.delete(`/totems/${totemId}/products/${productId}`);
-    return response.data;
+    return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 300));
   },
-
-  /** Reorder products on totem homepage */
-  reorderTotemProducts: async (totemId, orderedProductIds) => {
-    const response = await axiosInstance.put(`/totems/${totemId}/products/reorder`, {
-      productIds: orderedProductIds,
-    });
-    return response.data;
+  reorder: async (totemId, productIds) => {
+    return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 300));
   },
 };

@@ -4,7 +4,7 @@ import { getToken } from '../utils/storage';
 
 const axiosInstance = axios.create({
   baseURL: API_CONFIG.BASE_URL,
-  timeout: API_CONFIG.TIMEOUT,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json',
   },

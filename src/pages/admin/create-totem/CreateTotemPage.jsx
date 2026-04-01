@@ -47,7 +47,9 @@ const CreateTotemPage = () => {
         partnerEmail: formData.partnerEmail.trim(),
       });
       toast.success('Totem created successfully!');
-      navigate('/');
+      
+      // Delay navigation slightly to let the toast show
+      setTimeout(() => navigate('/'), 100);
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Failed to create totem');
     } finally {
