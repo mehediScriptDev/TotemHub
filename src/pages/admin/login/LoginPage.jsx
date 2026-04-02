@@ -35,63 +35,53 @@ const LoginPage = () => {
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-gray-100 animate-in">
       {/* --- LEFT: BRANDING (DESKTOP ONLY) --- */}
-      <div className="hidden lg:flex flex-col justify-between p-20 bg-linear-to-br from-surface-900 to-surface-800 border-r border-surface-700 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col items-center justify-center p-20 bg-linear-to-br from-surface-900 to-surface-800 border-r border-surface-700 relative overflow-hidden text-center">
         {/* Optional background image (place /assets/login-left.jpg in public to use) */}
-        {/* <div className="absolute inset-0">
+        <div className="absolute inset-0">
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrKoKT-5lhsXaEad8oe53y_kpwnm0XgDM0sQ&s"
+            src="/login.png"
             alt="brand"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/60"></div>
-        </div> */}
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
         {/* Background Pattern (accent circles) */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
+        {/* <div className="absolute inset-0 opacity-30 pointer-events-none">
           <div className="absolute top-10 left-10 w-72 h-72 bg-brand-500 rounded-full blur-3xl"></div>
           <div className="absolute bottom-20 right-20 w-80 h-80 bg-brand-500 rounded-full blur-3xl"></div>
-        </div>
+        </div> */}
 
         {/* Top logo removed as requested */}
 
         {/* Middle Section - Value Proposition */}
-        <div className="relative z-10 space-y-10">
+        <div className="relative z-10 space-y-6 max-w-xl">
           <div className="space-y-4">
             <h2 className="text-5xl font-black text-white leading-tight tracking-tight">
               Manage Your Totems
               <br />
               From Anywhere
             </h2>
-            <p className="text-base font-medium text-surface-300 leading-relaxed">
+            <p className="text-base font-medium text-surface-200 leading-relaxed">
               Real-time control and monitoring of your digital signage network
               with enterprise-grade security.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0 mt-1">
+            <div className="flex items-center gap-3 justify-center">
+              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-4 h-4 text-brand-500" />
               </div>
               <div>
-                <p className="font-bold text-white text-sm">
-                  Fast Synchronization
-                </p>
-                <p className="text-xs text-surface-400 mt-1">
-                  Updates propagate instantly across all devices
-                </p>
+                <p className="font-bold text-white text-sm">Fast Synchronization</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0 mt-1">
+            <div className="flex items-center gap-3 justify-center">
+              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0">
                 <ShieldCheck className="w-4 h-4 text-brand-500" />
               </div>
               <div>
-                <p className="font-bold text-white text-sm">
-                  Enterprise Security
-                </p>
-                <p className="text-xs text-surface-400 mt-1">
-                  End-to-end encryption with 99.9% uptime SLA
-                </p>
+                <p className="font-bold text-white text-sm">Enterprise Security</p>
               </div>
             </div>
           </div>
