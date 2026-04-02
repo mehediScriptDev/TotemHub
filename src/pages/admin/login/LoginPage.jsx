@@ -1,21 +1,18 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import {
-  Mail,
-  Lock,
-  Zap,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
-import { Button, Input } from "../../../Components/ui";
+import { Button } from "../../../Components/ui";
 import { toast } from "react-hot-toast";
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [activeField, setActiveField] = useState(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -104,10 +101,10 @@ const LoginPage = () => {
       </div>
 
       {/* --- RIGHT: LOGIN FORM --- */}
-      <div className="flex items-center justify-center p-8 md:p-16 lg:p-20 bg-surface-50">
+      <div className="flex items-start justify-center px-8 md:px-16 lg:px-20 pt-12 md:pt-16 lg:pt-24 bg-surface-50">
         <div className="w-full max-w-md mx-auto space-y-8">
           {/* Centered Brand (matches design) */}
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-30 lg:mb-28 xl:mb-30">
             <h1 className="text-4xl font-black text-surface-900 tracking-tight">
               TOTEMHUB
             </h1>
@@ -116,7 +113,7 @@ const LoginPage = () => {
             </p>
           </div>
 
-          <div className="space-y-3 text-center">
+          <div className="space-y-2 text-center">
             <h2 className="text-3xl font-extrabold text-surface-900 tracking-tight">
               Admin Access
             </h2>
@@ -126,45 +123,61 @@ const LoginPage = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-3">
-              <label
-                htmlFor="email"
-                className="block text-xs font-bold text-surface-700 uppercase tracking-widest"
-              >
-                Email
-              </label>
-              <Input
+            <div className="relative">
+              {(activeField === "email" || formData.email) && (
+                <label
+                  htmlFor="email"
+                  className="absolute left-4 -top-2 px-1 text-sm font-medium bg-white text-surface-700"
+                >
+                  Email *
+                </label>
+              )}
+              <input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                aria-label="Email"
+                placeholder={activeField === "email" || formData.email ? "" : "Email *"}
                 value={formData.email}
+                onFocus={() => setActiveField("email")}
+                onBlur={() => setActiveField(null)}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                icon={Mail}
                 required
-                className="h-11 bg-white border border-surface-300 text-surface-900 placeholder:text-surface-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className={`w-full h-14 rounded-2xl border bg-white px-4 text-base text-surface-700 placeholder:text-surface-500 outline-none caret-surface-900 transition-all ${
+                  activeField === "email"
+                    ? "border-surface-900 ring-1 ring-surface-900/20"
+                    : "border-surface-200"
+                }`}
               />
             </div>
 
-            <div className="space-y-3">
-              <label
-                htmlFor="password"
-                className="block text-xs font-bold text-surface-700 uppercase tracking-widest"
-              >
-                Password
-              </label>
-              <Input
+            <div className="relative">
+              {(activeField === "password" || formData.password) && (
+                <label
+                  htmlFor="password"
+                  className="absolute left-4 -top-2 px-1 text-sm font-medium bg-white text-surface-700"
+                >
+                  Password *
+                </label>
+              )}
+              <input
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                aria-label="Password"
+                placeholder={activeField === "password" || formData.password ? "" : "Password *"}
                 value={formData.password}
+                onFocus={() => setActiveField("password")}
+                onBlur={() => setActiveField(null)}
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                icon={Lock}
                 required
-                className="h-11 bg-white border border-surface-300 text-surface-900 placeholder:text-surface-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all"
+                className={`w-full h-14 rounded-2xl border bg-white px-4 text-base text-surface-700 placeholder:text-surface-500 outline-none caret-surface-900 transition-all ${
+                  activeField === "password"
+                    ? "border-surface-900 ring-1 ring-surface-900/20"
+                    : "border-surface-200"
+                }`}
               />
             </div>
 
