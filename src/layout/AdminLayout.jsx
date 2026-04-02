@@ -44,7 +44,7 @@ const AdminLayout = () => {
 
       {/* --- SIDEBAR --- */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-surface-900 border-r border-surface-800 shadow-sm transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-y-auto
+        fixed inset-y-0 left-0 z-50 w-72 bg-surface-900 border-r border-surface-800 shadow-sm transition-transform duration-300 lg:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
@@ -108,7 +108,7 @@ const AdminLayout = () => {
       </aside>
 
       {/* --- MAIN CONTENT --- */}
-      <main className="flex-1 flex flex-col min-w-0 min-h-screen">
+      <main className="flex-1 flex flex-col min-w-0 min-h-screen lg:pl-72">
         {/* Topbar */}
         <header className="h-16 bg-white/95 backdrop-blur-md border-b border-surface-200 flex items-center justify-between px-6 sticky top-0 z-30">
           <div className="flex items-center gap-4">
