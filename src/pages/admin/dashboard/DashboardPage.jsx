@@ -38,7 +38,7 @@ const DashboardPage = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-surface-900">Dashboard</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-surface-800">Dashboard</h1>
           <p className="mt-1 text-surface-500 font-medium">Manage and monitor all your digital signage totems</p>
         </div>
         <Button onClick={() => navigate('/totem/new')} icon={Plus} size="lg" className="shadow-lg shadow-brand-500/10">
@@ -51,13 +51,13 @@ const DashboardPage = () => {
       {/* Actions & Filters */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-surface-200">
         <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
           <input
             type="text"
             placeholder="Search totems..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-surface-50 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-surface-400"
+            className="w-full pl-10 pr-4 py-2 bg-surface-100 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-surface-500 text-surface-800"
           />
         </div>
         <div className="text-sm font-medium text-surface-500 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200 uppercase tracking-wider scale-95">

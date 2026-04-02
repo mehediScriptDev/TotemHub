@@ -41,7 +41,7 @@ const TotemCard = ({ totem, onDeleted }) => {
       <div className="p-5 flex flex-col h-full">
         <div className="flex justify-between items-start mb-6">
           <div className="space-y-1">
-            <h3 className="font-black text-lg text-surface-900 group-hover:text-brand-600 transition-colors leading-tight">
+            <h3 className="font-black text-lg text-black group-hover:text-gray-700 transition-colors leading-tight">
               {totem.name || 'Unnamed Totem'}
             </h3>
             <div className="flex flex-wrap gap-2 items-center">
@@ -67,21 +67,21 @@ const TotemCard = ({ totem, onDeleted }) => {
         </div>
 
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-surface-50 p-3 rounded-xl border border-surface-200/50">
-            <div className="flex items-center gap-2 text-surface-400 mb-1">
+          <div className="bg-gray-100 p-3 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 text-gray-500 mb-1">
               <Video className="w-3.5 h-3.5" />
               <span className="text-[9px] font-black uppercase tracking-widest">Media</span>
             </div>
-            <p className="text-xl font-black text-surface-900 leading-none">
+            <p className="text-xl font-black text-black leading-none">
               {(totem.videoCount !== undefined) ? totem.videoCount : '—'}
             </p>
           </div>
-          <div className="bg-surface-50 p-3 rounded-xl border border-surface-200/50">
-            <div className="flex items-center gap-2 text-surface-400 mb-1">
+          <div className="bg-gray-100 p-3 rounded-xl border border-gray-200">
+            <div className="flex items-center gap-2 text-gray-500 mb-1">
               <ShoppingBag className="w-3.5 h-3.5" />
               <span className="text-[9px] font-black uppercase tracking-widest">Items</span>
             </div>
-            <p className="text-xl font-black text-surface-900 leading-none">
+            <p className="text-xl font-black text-black leading-none">
               {(totem.productCount !== undefined) ? totem.productCount : '—'}
             </p>
           </div>
@@ -93,7 +93,7 @@ const TotemCard = ({ totem, onDeleted }) => {
               {totem.user?.first_name?.charAt(0) || 'P'}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-black text-surface-900 truncate uppercase tracking-tight">
+              <p className="text-[11px] font-black text-black truncate uppercase tracking-tight">
                 {totem.user?.first_name} {totem.user?.last_name}
               </p>
               <p className="text-[9px] font-bold text-surface-400 truncate tracking-tighter">

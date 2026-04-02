@@ -4,10 +4,10 @@ import { Layers, Activity, Video, ShoppingBag } from 'lucide-react';
 const StatCard = ({ label, value, icon: Icon, colorClass }) => (
   <div className="bg-white p-6 rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-all animate-in flex items-center justify-between group">
     <div className="space-y-1">
-      <p className="text-[10px] font-black text-surface-400 uppercase tracking-widest leading-none group-hover:text-surface-900 transition-colors">
+      <p className="text-[10px] font-black text-surface-500 uppercase tracking-widest leading-none group-hover:text-surface-800 transition-colors">
         {label}
       </p>
-      <p className="text-3xl font-black text-surface-900 leading-none tabular-nums">
+      <p className="text-3xl font-black text-surface-800 leading-none tabular-nums">
         {value}
       </p>
     </div>

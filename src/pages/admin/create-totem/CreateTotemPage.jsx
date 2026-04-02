@@ -68,17 +68,17 @@ const CreateTotemPage = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate('/')}
-          className="p-2 hover:bg-white rounded-lg border border-surface-200 text-surface-400 hover:text-surface-900 transition-all shadow-sm"
+          className="p-2 hover:bg-gray-200 rounded-lg border border-gray-300 text-gray-500 hover:text-black transition-all shadow-sm"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div>
-          <h1 className="text-3xl font-black text-surface-900 tracking-tight">Create Totem</h1>
-          <p className="text-surface-500 font-bold uppercase text-[10px] tracking-widest mt-1">Register new digital device</p>
+          <h1 className="text-3xl font-black text-black tracking-tight">Create Totem</h1>
+          <p className="text-gray-600 font-bold uppercase text-[10px] tracking-widest mt-1">Register new digital device</p>
         </div>
       </div>
 
-      <div className="bg-white p-8 rounded-2xl border border-surface-200 shadow-xl shadow-brand-500/5">
+      <div className="bg-white p-8 rounded-2xl border border-gray-300 shadow-xl shadow-black/5">
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="space-y-6">
             <Input

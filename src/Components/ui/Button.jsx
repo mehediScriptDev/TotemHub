@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
  */
 const VARIANT_CLASSES = {
   primary:
-    'bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/20 hover:shadow-brand-500/30',
+    'bg-brand-500 hover:bg-brand-600 text-white shadow-lg shadow-brand-500/20 hover:shadow-brand-600/30',
   secondary:
     'bg-surface-700 hover:bg-surface-600 text-surface-100 border border-surface-600 hover:border-surface-500',
   danger:

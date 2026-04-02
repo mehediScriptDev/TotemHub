@@ -29,44 +29,44 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-brand-100 animate-in">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-gray-100 animate-in">
       {/* --- LEFT: BRANDING (DESKTOP ONLY) --- */}
-      <div className="hidden lg:flex flex-col justify-between p-16 bg-surface-50 border-r border-surface-200 relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between p-16 bg-black border-r border-gray-200 relative overflow-hidden">
         {/* Background Accents */}
         <div className="absolute -top-24 -left-24 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl"></div>
         <div className="absolute top-1/2 -right-32 w-96 h-96 bg-brand-500/5 rounded-full blur-3xl"></div>
 
         <div className="flex items-center gap-4 relative z-10">
-          <div className="w-12 h-12 rounded-2xl bg-brand-600 flex items-center justify-center shadow-xl shadow-brand-600/20">
-            <Zap className="w-6 h-6 text-white" fill="white" />
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-xl shadow-white/20">
+            <Zap className="w-6 h-6 text-black" fill="black" />
           </div>
           <div>
-            <h1 className="text-2xl font-black text-surface-900 tracking-tighter uppercase">TotemHub</h1>
-            <p className="text-[10px] font-bold text-surface-400 tracking-widest leading-none mt-1 uppercase">Management</p>
+            <h1 className="text-2xl font-black text-white tracking-tighter uppercase">TotemHub</h1>
+            <p className="text-[10px] font-bold text-gray-500 tracking-widest leading-none mt-1 uppercase">Management</p>
           </div>
         </div>
 
         <div className="space-y-12 relative z-10">
-          <h2 className="text-6xl font-black text-surface-900 leading-[1.1] tracking-tight">
-            Control your <span className="text-brand-600">signage</span> from anywhere.
+          <h2 className="text-6xl font-black text-white leading-[1.1] tracking-tight">
+            Control your <span className="text-white">signage</span> from anywhere.
           </h2>
           <div className="space-y-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center border border-green-100 shrink-0">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-gray-400 shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-black" />
               </div>
               <div>
-                <h3 className="font-black text-surface-900 text-sm tracking-tight uppercase">Instant Synchronization</h3>
-                <p className="text-xs font-bold text-surface-500 mt-1 uppercase tracking-tighter leading-relaxed">Update your totems across the city in less than a second.</p>
+                <h3 className="font-black text-white text-sm tracking-tight uppercase">Instant Synchronization</h3>
+                <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-tighter leading-relaxed">Update your totems across the city in less than a second.</p>
               </div>
             </div>
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-brand-50 flex items-center justify-center border border-brand-100 shrink-0">
-                <ShieldCheck className="w-5 h-5 text-brand-600" />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center border border-gray-400 shrink-0">
+                <ShieldCheck className="w-5 h-5 text-black" />
               </div>
               <div>
-                <h3 className="font-black text-surface-900 text-sm tracking-tight uppercase">Enterprise Security</h3>
-                <p className="text-xs font-bold text-surface-500 mt-1 uppercase tracking-tighter leading-relaxed">Your content is encrypted and safely delivered with 99.9% uptime.</p>
+                <h3 className="font-black text-white text-sm tracking-tight uppercase">Enterprise Security</h3>
+                <p className="text-xs font-bold text-gray-400 mt-1 uppercase tracking-tighter leading-relaxed">Your content is encrypted and safely delivered with 99.9% uptime.</p>
               </div>
             </div>
           </div>
@@ -88,8 +88,8 @@ const LoginPage = () => {
           </div>
 
           <div className="space-y-3 text-center lg:text-left">
-            <h2 className="text-4xl font-black text-surface-900 tracking-tight leading-none uppercase">Sign In</h2>
-            <p className="text-sm font-bold text-surface-500 uppercase tracking-tighter leading-relaxed underline decoration-brand-500/30 decoration-2 underline-offset-4">
+            <h2 className="text-4xl font-black text-black tracking-tight leading-none uppercase">Sign In</h2>
+            <p className="text-sm font-bold text-gray-600 uppercase tracking-tighter leading-relaxed underline decoration-gray-300 decoration-2 underline-offset-4">
               Enter your admin credentials to continue
             </p>
           </div>

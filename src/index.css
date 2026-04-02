@@ -1,26 +1,26 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
+  --color-brand-50: #e8f6f2;
+  --color-brand-100: #cfeee6;
+  --color-brand-500: #12715b;
+  --color-brand-600: #0f604e;
+  --color-brand-700: #0d4f41;
 
-  --color-surface-50: #f8fafc;
-  --color-surface-100: #f1f5f9;
+  --color-surface-50: #f7fafc;
+  --color-surface-100: #edf2f7;
   --color-surface-200: #e2e8f0;
-  --color-surface-500: #64748b;
-  --color-surface-800: #1e293b;
-  --color-surface-900: #0f172a;
+  --color-surface-500: #a0aec0;
+  --color-surface-800: #2d3748;
+  --color-surface-900: #1a202c;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
 @layer base {
   body {
-    background-color: #f8fafc; /* Subtle light background */
-    color: #0f172a;
+    background-color: var(--color-surface-50); /* Light gray background */
+    color: var(--color-surface-800);
     font-family: var(--font-sans);
   }
 
@@ -34,21 +34,48 @@
 @layer utilities {
   .card-premium {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--color-surface-200);
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
     border-radius: 0.75rem;
     transition: all 0.2s ease-in-out;
   }
   .card-premium:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    border-color: #cbd5e1;
+    border-color: var(--color-surface-500);
   }
 
   .nav-item-active {
-    background-color: #eff6ff;
-    color: #2563eb;
-    border-right: 3px solid #3b82f6;
+    background-color: var(--color-brand-500);
+    color: #ffffff;
   }
+
+  /* Brand utility overrides to ensure Tailwind-like classes use the exact brand color */
+  .bg-brand-50 { background-color: rgba(18,113,91,0.06) !important; }
+  .bg-brand-100 { background-color: rgba(18,113,91,0.12) !important; }
+  .bg-brand-300 { background-color: rgba(18,113,91,0.18) !important; }
+  .bg-brand-500 { background-color: var(--color-brand-500) !important; }
+  .bg-brand-600 { background-color: var(--color-brand-600) !important; }
+  .bg-brand-600\/12 { background-color: rgba(15,96,78,0.12) !important; }
+  .bg-brand-500\/15 { background-color: rgba(18,113,91,0.15) !important; }
+
+  .text-brand-300 { color: rgba(18,113,91,0.6) !important; }
+  .text-brand-400 { color: rgba(18,113,91,0.85) !important; }
+  .text-brand-500 { color: var(--color-brand-500) !important; }
+  .text-brand-600 { color: var(--color-brand-600) !important; }
+
+  /* Gradient helpers (Tailwind style) */
+  .from-brand-600 { --tw-gradient-from: var(--color-brand-600) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)) !important; }
+  .to-brand-400 { --tw-gradient-to: rgba(18,113,91,0.85) !important; }
+  .from-brand-500\/20 { --tw-gradient-from: rgba(18,113,91,0.2) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)) !important; }
+  .to-brand-700\/10 { --tw-gradient-to: rgba(13,79,65,0.1) !important; }
+
+  .border-brand-100 { border-color: rgba(18,113,91,0.12) !important; }
+  .border-brand-500\/20 { border-color: rgba(18,113,91,0.2) !important; }
+  .border-brand-300\/30 { border-color: rgba(18,113,91,0.3) !important; }
+
+  .shadow-brand-500\/20 { box-shadow: 0 6px 12px -4px rgba(18,113,91,0.2) !important; }
+  .shadow-brand-600\/20 { box-shadow: 0 6px 12px -4px rgba(15,96,78,0.2) !important; }
+  .shadow-brand-500\/30 { box-shadow: 0 8px 20px -6px rgba(18,113,91,0.3) !important; }
 
   .animate-in {
     animation: slideIn 0.4s ease-out forwards;
