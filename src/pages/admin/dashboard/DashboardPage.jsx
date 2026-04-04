@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Search, Layers, Activity, Video, ShoppingBag } from 'lucide-react';
+import { Plus, Search, SlidersHorizontal } from 'lucide-react';
 import { totemService } from '../../../services/totemService';
-import { Button, Input, Spinner, EmptyState } from '../../../Components/ui';
+import { Button, Spinner, EmptyState } from '../../../Components/ui';
 import TotemCard from './component/TotemCard';
 import DashboardStats from './sections/DashboardStats';
 import { toast } from 'react-hot-toast';
@@ -34,14 +34,18 @@ const DashboardPage = () => {
   );
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8 animate-in">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 animate-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-surface-800">Dashboard</h1>
-          <p className="mt-1 text-surface-500 font-medium">Manage and monitor all your digital signage totems</p>
+          <h1 className="text-4xl font-black tracking-tight text-surface-900">Dashboard</h1>
+          <p className="mt-1 text-surface-600 font-medium">Manage and monitor all your digital signage totems</p>
         </div>
-        <Button onClick={() => navigate('/totem/new')} icon={Plus} size="lg" className="shadow-lg shadow-brand-500/10">
+        <Button
+          onClick={() => navigate('/totem/new')}
+          icon={Plus}
+          className="h-10 px-4 rounded-lg text-sm font-semibold shadow-md shadow-brand-500/20"
+        >
           New Totem
         </Button>
       </div>
@@ -49,19 +53,28 @@ const DashboardPage = () => {
       <DashboardStats totems={totems} />
 
       {/* Actions & Filters */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-surface-200">
-        <div className="relative w-full sm:w-96">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-100 p-3 rounded-xl border border-surface-200">
+        <div className="relative w-full sm:flex-1 sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
           <input
             type="text"
             placeholder="Search totems..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-surface-100 border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-surface-500 text-surface-800"
+            className="w-full pl-10 pr-4 h-9 bg-white border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-surface-500 text-surface-800"
           />
         </div>
-        <div className="text-sm font-medium text-surface-500 bg-surface-100 px-3 py-1.5 rounded-full border border-surface-200 uppercase tracking-wider scale-95">
-          All Totems ({filteredTotems.length})
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="hidden sm:block text-xs font-semibold text-surface-500">
+            {filteredTotems.length} totems
+          </div>
+          <button
+            type="button"
+            className="w-full sm:w-auto h-9 px-4 inline-flex items-center justify-center gap-2 bg-white text-surface-700 border border-surface-200 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-surface-50 transition-colors"
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            Filter
+          </button>
         </div>
       </div>
 

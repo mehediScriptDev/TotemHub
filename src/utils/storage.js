@@ -25,3 +25,24 @@ export const setUser = (user) => {
 export const removeUser = () => {
   localStorage.removeItem(STORAGE_KEYS.USER);
 };
+
+export const getAdminCredentials = () => {
+  return {
+    email: localStorage.getItem(STORAGE_KEYS.ADMIN_EMAIL) || null,
+    password: localStorage.getItem(STORAGE_KEYS.ADMIN_PASSWORD) || null,
+  };
+};
+
+export const setAdminCredentials = ({ email, password }) => {
+  if (email) {
+    localStorage.setItem(STORAGE_KEYS.ADMIN_EMAIL, email);
+  }
+  if (password) {
+    localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, password);
+  }
+};
+
+export const removeAdminCredentials = () => {
+  localStorage.removeItem(STORAGE_KEYS.ADMIN_EMAIL);
+  localStorage.removeItem(STORAGE_KEYS.ADMIN_PASSWORD);
+};

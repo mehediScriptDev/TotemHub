@@ -4,11 +4,7 @@ import {
   Trash2, 
   ChevronRight, 
   Video, 
-  ShoppingBag, 
-  Activity, 
-  ExternalLink,
-  Layers,
-  MapPin
+  ShoppingBag
 } from 'lucide-react';
 import { Button, ConfirmDialog } from '../../../../Components/ui';
 import { totemService } from '../../../../services/totemService';
@@ -34,26 +30,19 @@ const TotemCard = ({ totem, onDeleted }) => {
   };
 
   return (
-    <div className="card-premium group relative animate-in overflow-hidden shadow-sm hover:shadow-md border border-surface-200">
+    <div className="group relative animate-in overflow-hidden rounded-2xl bg-white border border-surface-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.08)] transition-all">
       {/* Accent Header */}
-      <div className="h-1.5 w-full bg-brand-500/20 group-hover:bg-brand-500 transition-all" />
+      <div className="h-1.5 w-full bg-brand-100 group-hover:bg-brand-500/20 transition-all" />
       
       <div className="p-5 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start mb-5">
           <div className="space-y-1">
-            <h3 className="font-black text-lg text-black group-hover:text-gray-700 transition-colors leading-tight">
+            <h3 className="font-bold text-2xl text-surface-900 group-hover:text-surface-800 transition-colors leading-tight">
               {totem.name || 'Unnamed Totem'}
             </h3>
-            <div className="flex flex-wrap gap-2 items-center">
-              <p className="text-[10px] text-surface-400 font-black tracking-widest uppercase flex items-center gap-1.5">
-                STORE ID: {totem.id_store}
-              </p>
-              {totem.user?.business_type && (
-                <span className="text-[9px] px-2 py-0.5 bg-brand-50 text-brand-600 font-black rounded-md uppercase tracking-tighter border border-brand-100">
-                  {totem.user.business_type}
-                </span>
-              )}
-            </div>
+            <p className="text-sm text-surface-600 font-medium">
+              Store ID: {totem.id_store}
+            </p>
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
             <button
@@ -66,37 +55,37 @@ const TotemCard = ({ totem, onDeleted }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="bg-gray-100 p-3 rounded-xl border border-gray-200">
-            <div className="flex items-center gap-2 text-gray-500 mb-1">
+        <div className="grid grid-cols-2 gap-3 mb-5">
+          <div className="bg-surface-100 p-3 rounded-xl border border-surface-200">
+            <div className="flex items-center gap-2 text-surface-500 mb-1">
               <Video className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-black uppercase tracking-widest">Media</span>
+              <span className="text-[10px] font-semibold">Media</span>
             </div>
-            <p className="text-xl font-black text-black leading-none">
+            <p className="text-lg font-bold text-surface-800 leading-none">
               {(totem.videoCount !== undefined) ? totem.videoCount : '—'}
             </p>
           </div>
-          <div className="bg-gray-100 p-3 rounded-xl border border-gray-200">
-            <div className="flex items-center gap-2 text-gray-500 mb-1">
+          <div className="bg-surface-100 p-3 rounded-xl border border-surface-200">
+            <div className="flex items-center gap-2 text-surface-500 mb-1">
               <ShoppingBag className="w-3.5 h-3.5" />
-              <span className="text-[9px] font-black uppercase tracking-widest">Items</span>
+              <span className="text-[10px] font-semibold">Items</span>
             </div>
-            <p className="text-xl font-black text-black leading-none">
+            <p className="text-lg font-bold text-surface-800 leading-none">
               {(totem.productCount !== undefined) ? totem.productCount : '—'}
             </p>
           </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-surface-100 flex items-center justify-between">
+        <div className="mt-auto pt-4 border-t border-surface-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-black text-surface-500 shrink-0 border border-white shadow-sm uppercase">
+            <div className="w-7 h-7 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 shrink-0 border border-white shadow-sm uppercase">
               {totem.user?.first_name?.charAt(0) || 'P'}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-black text-black truncate uppercase tracking-tight">
+              <p className="text-[11px] font-semibold text-surface-800 truncate tracking-tight">
                 {totem.user?.first_name} {totem.user?.last_name}
               </p>
-              <p className="text-[9px] font-bold text-surface-400 truncate tracking-tighter">
+              <p className="text-[9px] font-medium text-surface-500 truncate tracking-tight">
                 {totem.user?.email}
               </p>
             </div>
@@ -105,7 +94,7 @@ const TotemCard = ({ totem, onDeleted }) => {
           <Button 
             size="sm" 
             variant="ghost" 
-            className="text-brand-600 hover:bg-brand-50 !px-2 group"
+            className="text-brand-600 hover:bg-brand-50 px-2! font-semibold"
             onClick={() => navigate(`/totem/${totem.id}`)}
           >
             Manage <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
@@ -118,8 +107,9 @@ const TotemCard = ({ totem, onDeleted }) => {
         onClose={() => setShowConfirm(false)}
         onConfirm={handleDelete}
         title="Delete Totem"
-        description={`Permanently remove "${totem.name}"? This action is irreversible.`}
-        confirmLabel={deleting ? 'Deleting...' : 'Delete'}
+        message={`Permanently remove "${totem.name}"? This action is irreversible.`}
+        confirmText={deleting ? 'Deleting...' : 'Delete'}
+        loading={deleting}
         variant="danger"
       />
     </div>

@@ -1,39 +1,72 @@
 import axiosInstance from './axiosInstance';
-import { setToken, removeToken, getToken, setUser, getUser, removeUser } from '../utils/storage';
+import {
+  removeToken,
+  getToken,
+  setUser,
+  getUser,
+  removeUser,
+  getAdminCredentials,
+  setAdminCredentials,
+  removeAdminCredentials,
+} from '../utils/storage';
 
-let authChangeCallback = null;
+const buildAdminUser = (email) => ({
+  id: 'admin-header-auth',
+  name: 'Administrator',
+  email,
+  role: 'admin',
+});
+
+const verifyHeaderAuth = async (email, password) => {
+  await axiosInstance.get('/', {
+    headers: {
+      'X-Admin-Email': email,
+      'X-Admin-Password': password,
+    },
+  });
+};
 
 export const authService = {
   /**
    * Login with email and password
    */
   login: async (email, password) => {
-    // --- DEMO MODE BYPASS ---
-    if (email === 'admin@totem.com' && password === 'admin123') {
-      const mockUser = {
-        id: 'demo-user-1',
-        name: 'Senior Admin',
-        email: 'admin@totem.com',
-        role: 'admin'
-      };
-      const mockToken = 'demo-jwt-token-12345';
-      
-      setToken(mockToken);
-      setUser(mockUser);
-      return { user: mockUser, token: mockToken };
+    const cleanEmail = email?.trim();
+    const cleanPassword = password?.trim();
+
+    if (!cleanEmail || !cleanPassword) {
+      throw { message: 'Email and password are required' };
     }
-    // ------------------------
 
     try {
-      const response = await axiosInstance.post('/auth/login', { email, password });
-      const { token, user } = response.data;
+      // Backend now expects header-based admin auth, not /auth/login.
+      await verifyHeaderAuth(cleanEmail, cleanPassword);
 
-      setToken(token);
+      const user = buildAdminUser(cleanEmail);
+      setAdminCredentials({ email: cleanEmail, password: cleanPassword });
+      removeToken();
       setUser(user);
 
-      return { user, token };
+      return { user };
     } catch (error) {
-      throw error?.response?.data || { message: 'Login failed. Please try again.' };
+      const status = error?.response?.status;
+      if (status === 401 || status === 403) {
+        throw { message: 'Invalid admin credentials' };
+      }
+
+      const stageEmail = import.meta.env.VITE_ADMIN_EMAIL;
+      const stagePassword = import.meta.env.VITE_ADMIN_PASSWORD;
+      const stageMatch = stageEmail && stagePassword && cleanEmail === stageEmail && cleanPassword === stagePassword;
+
+      if (stageMatch) {
+        const user = buildAdminUser(cleanEmail);
+        setAdminCredentials({ email: cleanEmail, password: cleanPassword });
+        removeToken();
+        setUser(user);
+        return { user };
+      }
+
+      throw error?.response?.data || { message: 'Login failed. Please verify API reachability and credentials.' };
     }
   },
 
@@ -43,17 +76,20 @@ export const authService = {
   logout: async () => {
     removeToken();
     removeUser();
+    removeAdminCredentials();
   },
 
   /**
    * Check auth state on mount
    */
   onAuthStateChange: (callback) => {
-    authChangeCallback = callback;
     const token = getToken();
     const user = getUser();
+    const { email, password } = getAdminCredentials();
+    const hasHeaderAuth = !!(email && password);
+    const isAuthenticated = !!(user && (token || hasHeaderAuth));
 
-    if (token && user) {
+    if (isAuthenticated) {
       callback(user);
     } else {
       callback(null);
