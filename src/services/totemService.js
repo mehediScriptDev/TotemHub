@@ -44,7 +44,9 @@ export const totemService = {
       const response = await axiosInstance.post('/', data);
       return response.data;
     } catch (error) {
-      return db.saveTotem({ name: data.name, id_store: data.id_store });
+      // When offline, persist any provided user info so newly created totems
+      // keep owner name/email available for the UI.
+      return db.saveTotem({ ...data });
     }
   },
 

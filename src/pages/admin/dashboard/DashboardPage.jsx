@@ -64,8 +64,24 @@ const DashboardPage = () => {
 
   const paginatedTotems = filteredTotems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  // Helper to normalize owner info from different API/local shapes
+  const getOwner = (t) => {
+    const user = t.user || null;
+    const nameFromUser = user ? (user.first_name ? `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}` : (user.name || '')) : '';
+    const ownerName = nameFromUser || t.partnerEmail || '';
+    const ownerEmail = (user && (user.email || user.email_address)) || t.partnerEmail || '';
+    const ownerInitial = (
+      (user && (user.first_name?.charAt(0) || user.name?.charAt(0))) ||
+      (ownerName && ownerName.charAt(0)) ||
+      (t.name && t.name.charAt(0)) ||
+      'P'
+    ).toUpperCase();
+
+    return { ownerName, ownerEmail, ownerInitial };
+  };
+
   return (
-    <div className="max-w-screen-2xl mx-auto px-6 space-y-4 xl:space-y-6">
+    <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-6 space-y-4 xl:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -141,7 +157,7 @@ const DashboardPage = () => {
       ) : filteredTotems.length > 0 ? (
         <>
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 xl:gap-4">
               {paginatedTotems.map((totem) => (
                 <TotemCard key={totem.id} totem={totem} onDeleted={fetchTotems} viewMode={viewMode} />
               ))}
@@ -164,7 +180,7 @@ const DashboardPage = () => {
                       <tr key={totem.id} className="hover:bg-surface-50">
                         <td className="px-6 py-4 align-top">
                           <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-100 to-brand-50 border border-brand-200/60 flex items-center justify-center">
+                            <div className="w-12 h-12 rounded-full bg-surface-50 flex items-center justify-center shadow-sm">
                               <ShoppingBag className="w-6 h-6 text-brand-600" />
                             </div>
                             <div>
@@ -180,15 +196,20 @@ const DashboardPage = () => {
                           <div className="text-sm font-semibold text-surface-800">{totem.productCount ?? '—'}</div>
                         </td>
                         <td className="px-6 py-4 align-top">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 uppercase">
-                              {totem.user?.first_name?.charAt(0) || 'P'}
-                            </div>
-                            <div className="min-w-0">
-                              <div className="text-sm font-semibold text-surface-800 truncate">{totem.user?.first_name} {totem.user?.last_name}</div>
-                              <div className="text-xs text-surface-500 truncate">{totem.user?.email}</div>
-                            </div>
-                          </div>
+                          {(() => {
+                            const { ownerName, ownerEmail, ownerInitial } = getOwner(totem);
+                            return (
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 uppercase">
+                                  {ownerInitial}
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-sm font-semibold text-surface-800 truncate">{ownerName || '—'}</div>
+                                  <div className="text-xs text-surface-500 truncate">{ownerEmail || '—'}</div>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </td>
                         <td className="px-6 py-4 align-top text-right">
                           <div className="flex items-center justify-end gap-2">
@@ -221,34 +242,61 @@ const DashboardPage = () => {
           )}
 
           {filteredTotems.length > itemsPerPage && (
-            <div className="flex items-center justify-between mt-4">
-              <div className="text-sm text-surface-500">
-                Showing {Math.min(filteredTotems.length, (currentPage - 1) * itemsPerPage + 1)} - {Math.min(filteredTotems.length, currentPage * itemsPerPage)} of {filteredTotems.length}
-              </div>
-              <div className="inline-flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-md border ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
-                >
-                  Prev
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setCurrentPage(p)}
-                    className={`px-3 py-1 rounded-md border ${p === currentPage ? 'bg-brand-600 text-white' : 'bg-white text-surface-700 hover:bg-surface-50'}`}
-                  >
-                    {p}
-                  </button>
-                ))}
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-md border ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
-                >
-                  Next
-                </button>
+            <div className="mt-4">
+              <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
+                <div className="text-sm text-surface-500">
+                  Showing {Math.min(filteredTotems.length, (currentPage - 1) * itemsPerPage + 1)} - {Math.min(filteredTotems.length, currentPage * itemsPerPage)} of {filteredTotems.length}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Compact mobile controls */}
+                  <div className="flex items-center gap-2 sm:hidden">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md border ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
+                    >
+                      Prev
+                    </button>
+                    <div className="px-3 py-1 rounded-md border bg-white text-surface-700 text-sm">
+                      {currentPage}/{totalPages}
+                    </div>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md border ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
+                    >
+                      Next
+                    </button>
+                  </div>
+
+                  {/* Full controls for larger screens */}
+                  <div className="hidden sm:inline-flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-md border ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
+                    >
+                      Prev
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <button
+                        key={p}
+                        onClick={() => setCurrentPage(p)}
+                        className={`px-3 py-1 rounded-md border ${p === currentPage ? 'bg-brand-600 text-white' : 'bg-white text-surface-700 hover:bg-surface-50'}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-md border ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}

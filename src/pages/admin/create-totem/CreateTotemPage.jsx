@@ -50,10 +50,22 @@ const CreateTotemPage = () => {
 
     try {
       setLoading(true);
+
+      // Normalize partner user data so the fallback DB can persist useful owner info.
+      const nameParts = (partnerUser.first_name || partnerUser.name || '').split(' ').filter(Boolean);
+      const userPayload = {
+        first_name: partnerUser.first_name || nameParts[0] || '',
+        last_name: partnerUser.last_name || nameParts.slice(1).join(' ') || '',
+        email: partnerUser.email || partnerUser.email_address || partnerUser.partnerEmail || '',
+        name: partnerUser.name || `${partnerUser.first_name || ''} ${partnerUser.last_name || ''}`.trim(),
+      };
+
       await totemService.create({
         id_store: partnerUser.id,
         name: formData.name.trim(),
+        user: userPayload,
       });
+
       toast.success('Totem created successfully!');
       setTimeout(() => navigate('/'), 200);
     } catch (err) {

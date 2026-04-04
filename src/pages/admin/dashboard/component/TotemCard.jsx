@@ -29,16 +29,33 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
     }
   };
 
+  // Owner fallbacks: support both `user.first_name/last_name/email` and
+  // older `user.name` or `partnerEmail` fields. This keeps newly-created
+  // totems (saved to local DB) showing owner info if provided.
+  const ownerName = totem.user
+    ? (totem.user.first_name ? `${totem.user.first_name}${totem.user.last_name ? ' ' + totem.user.last_name : ''}` : (totem.user.name || ''))
+    : (totem.partnerEmail || '');
+
+  const ownerEmail = totem.user?.email || totem.partnerEmail || '';
+
+  const ownerInitial = (
+    (totem.user?.first_name && totem.user.first_name.charAt(0)) ||
+    (totem.user?.name && totem.user.name.charAt(0)) ||
+    (ownerName && ownerName.charAt(0)) ||
+    (totem.name && totem.name.charAt(0)) ||
+    'P'
+  ).toUpperCase();
+
   if (viewMode === 'list') {
     return (
       <div className="group relative overflow-hidden rounded-2xl bg-white border border-surface-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:shadow-[0_8px_24px_rgba(15,23,42,0.12)] hover:border-surface-300 transition-all duration-200">
         {/* Accent left border on hover */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-600 to-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-brand-600 to-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
         
         <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Primary Info: Icon + Totem Details */}
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-100 to-brand-50 border border-brand-200/60 flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-brand-500/10 transition-all">
+            <div className="w-14 h-14 rounded-full bg-surface-50 flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md transition-all">
               <ShoppingBag className="w-7 h-7 text-brand-600" />
             </div>
             <div className="min-w-0 flex-1">
@@ -79,15 +96,15 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
 
           {/* Tertiary Info: User (Desktop) */}
           <div className="hidden sm:flex items-center gap-3 px-2 border-l border-surface-200/60">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md shadow-brand-500/20 uppercase">
-              {totem.user?.first_name?.charAt(0) || 'P'}
+            <div className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md shadow-brand-500/20 uppercase">
+              {ownerInitial}
             </div>
             <div className="min-w-0 hidden lg:block">
               <p className="text-sm font-semibold text-surface-900 truncate leading-tight">
-                {totem.user?.first_name} {totem.user?.last_name}
+                {ownerName || '—'}
               </p>
               <p className="text-xs text-surface-500 truncate leading-tight">
-                {totem.user?.email}
+                {ownerEmail || '—'}
               </p>
             </div>
           </div>
@@ -193,14 +210,14 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
         <div className="mt-auto pt-4 border-t border-surface-200 flex items-center justify-between">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-7 h-7 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 shrink-0 border border-white shadow-sm uppercase">
-              {totem.user?.first_name?.charAt(0) || 'P'}
+              {ownerInitial}
             </div>
             <div className="overflow-hidden">
               <p className="text-[11px] font-semibold text-surface-800 truncate tracking-tight">
-                {totem.user?.first_name} {totem.user?.last_name}
+                {ownerName || '—'}
               </p>
               <p className="text-[9px] font-medium text-surface-500 truncate tracking-tight">
-                {totem.user?.email}
+                {ownerEmail || '—'}
               </p>
             </div>
           </div>

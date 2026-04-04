@@ -13,7 +13,7 @@ export const productService = {
     const per_page = filters.per_page || 8;
     const page = filters.page || 1;
 
-    const productApiBase = import.meta.env.VITE_PRODUCT_API_BASE || 'https://api-c.psicopatici.com/api/v1';
+    const productApiBase = import.meta.env.VITE_PRODUCT_API_BASE;
 
     try {
       const url = `${productApiBase}/products/search`;

@@ -72,7 +72,7 @@ const AdminLayout = () => {
         </header>
 
         {/* Content Area */}
-        <section className="flex-1 p-4 lg:p-10">
+        <section className="flex-1 p-3 lg:p-10">
           <Outlet />
         </section>
       </main>
