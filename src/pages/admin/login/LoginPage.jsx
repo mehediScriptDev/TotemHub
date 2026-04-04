@@ -43,7 +43,7 @@ const LoginPage = () => {
             alt="brand"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-black/30"></div>
+          {/* <div className="absolute inset-0 bg-black/30"></div> */}
         </div>
         {/* Background Pattern (accent circles) */}
         {/* <div className="absolute inset-0 opacity-30 pointer-events-none">
@@ -55,7 +55,7 @@ const LoginPage = () => {
 
         {/* Middle Section - Value Proposition */}
         <div className="relative z-10 space-y-6 max-w-xl">
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h2 className="text-5xl font-black text-white leading-tight tracking-tight">
               Manage Your Totems
               <br />
@@ -65,26 +65,9 @@ const LoginPage = () => {
               Real-time control and monitoring of your digital signage network
               with enterprise-grade security.
             </p>
-          </div>
+          </div> */}
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 justify-center">
-              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0">
-                <CheckCircle2 className="w-4 h-4 text-brand-500" />
-              </div>
-              <div>
-                <p className="font-bold text-white text-sm">Fast Synchronization</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 justify-center">
-              <div className="w-6 h-6 rounded-lg bg-brand-500/20 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-4 h-4 text-brand-500" />
-              </div>
-              <div>
-                <p className="font-bold text-white text-sm">Enterprise Security</p>
-              </div>
-            </div>
-          </div>
+          {/* feature bullets removed as requested */}
         </div>
 
         {/* Bottom copyright removed as requested */}

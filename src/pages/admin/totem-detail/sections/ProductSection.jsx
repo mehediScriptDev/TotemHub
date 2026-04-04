@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Search, Plus, Trash2, ChevronUp, ChevronDown,
-  ShoppingBag, Package, Filter,
+  ShoppingBag, Package,
 } from 'lucide-react';
 import { Button, Spinner, EmptyState, Select, ConfirmDialog, Modal } from '../../../../Components/ui';
 import { productService } from '../../../../services/productService';
@@ -62,7 +62,7 @@ const ProductSection = ({ totemId }) => {
     } finally {
       setLoadingCatalog(false);
     }
-  }, [totemId, filters, categories.length]);
+  }, [filters, categories.length]);
 
   useEffect(() => {
     if (catalogOpen) fetchCatalog();
@@ -135,8 +135,8 @@ const ProductSection = ({ totemId }) => {
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-surface-100">Homepage Products</h2>
-          <p className="text-sm text-surface-400 mt-0.5">
+          <h2 className="text-lg md:text-xl font-semibold text-surface-900">Homepage Products</h2>
+          <p className="text-sm md:text-base text-surface-600 mt-0.5">
             Select and order products for this totem's display
           </p>
         </div>
@@ -164,12 +164,12 @@ const ProductSection = ({ totemId }) => {
           {homepageProducts.map((product, index) => (
             <div
               key={product.id}
-              className="glass-card rounded-xl p-4 flex items-center gap-4 group animate-fade-in"
+              className="bg-white border border-surface-200 rounded-xl p-4 flex items-center gap-4 group animate-fade-in shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
               style={{ animationDelay: `${index * 40}ms` }}
             >
               {/* Order Number */}
-              <div className="w-8 h-8 rounded-lg bg-surface-800 border border-surface-700 flex items-center justify-center shrink-0">
-                <span className="text-xs font-bold text-surface-300">{index + 1}</span>
+              <div className="w-8 h-8 rounded-lg bg-surface-100 border border-surface-200 flex items-center justify-center shrink-0">
+                <span className="text-xs font-bold text-surface-700">{index + 1}</span>
               </div>
 
               {/* Product Image */}
@@ -177,17 +177,17 @@ const ProductSection = ({ totemId }) => {
                 <img
                   src={product.image || product.thumbnail}
                   alt={product.name}
-                  className="w-12 h-12 rounded-lg object-cover border border-surface-700 shrink-0"
+                  className="w-12 h-12 rounded-lg object-cover border border-surface-200 shrink-0"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-lg bg-surface-800 border border-surface-700 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-lg bg-surface-100 border border-surface-200 flex items-center justify-center shrink-0">
                   <Package className="w-5 h-5 text-surface-500" />
                 </div>
               )}
 
               {/* Product Info */}
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-medium text-surface-200 truncate">
+                <h4 className="text-sm font-medium text-surface-800 truncate">
                   {product.name}
                 </h4>
                 {product.category && (
@@ -197,7 +197,7 @@ const ProductSection = ({ totemId }) => {
 
               {/* Price */}
               {product.price !== undefined && (
-                <span className="text-sm font-semibold text-brand-400 shrink-0">
+                <span className="text-sm font-semibold text-brand-600 shrink-0">
                   €{Number(product.price).toFixed(2)}
                 </span>
               )}
@@ -207,8 +207,8 @@ const ProductSection = ({ totemId }) => {
                 <button
                   onClick={() => moveProduct(index, -1)}
                   disabled={index === 0}
-                  className="p-1.5 rounded-lg hover:bg-surface-700 text-surface-500
-                             hover:text-surface-200 disabled:opacity-30 disabled:cursor-not-allowed
+                  className="p-1.5 rounded-lg hover:bg-surface-100 text-surface-500
+                             hover:text-surface-800 disabled:opacity-30 disabled:cursor-not-allowed
                              transition-colors cursor-pointer"
                   title="Move up"
                 >
@@ -217,8 +217,8 @@ const ProductSection = ({ totemId }) => {
                 <button
                   onClick={() => moveProduct(index, 1)}
                   disabled={index === homepageProducts.length - 1}
-                  className="p-1.5 rounded-lg hover:bg-surface-700 text-surface-500
-                             hover:text-surface-200 disabled:opacity-30 disabled:cursor-not-allowed
+                  className="p-1.5 rounded-lg hover:bg-surface-100 text-surface-500
+                             hover:text-surface-800 disabled:opacity-30 disabled:cursor-not-allowed
                              transition-colors cursor-pointer"
                   title="Move down"
                 >
@@ -244,6 +244,7 @@ const ProductSection = ({ totemId }) => {
         onClose={() => setCatalogOpen(false)}
         title="Product Catalog"
         size="2xl"
+        tone="light"
       >
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -254,8 +255,8 @@ const ProductSection = ({ totemId }) => {
               placeholder="Search products..."
               value={filters.search}
               onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-surface-800 border border-surface-700
-                         text-sm text-surface-100 placeholder:text-surface-500
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-white border border-surface-300
+                         text-sm text-surface-800 placeholder:text-surface-500
                          focus:border-brand-500 focus-ring transition-all"
             />
           </div>
@@ -264,6 +265,7 @@ const ProductSection = ({ totemId }) => {
             options={categories}
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
+            tone="light"
             className="sm:w-44"
           />
           <Select
@@ -275,12 +277,13 @@ const ProductSection = ({ totemId }) => {
             ]}
             value={filters.status}
             onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+            tone="light"
             className="sm:w-36"
           />
         </div>
 
         {/* Catalog List */}
-        <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1">
+        <div className="max-h-100 overflow-y-auto space-y-2 pr-1">
           {loadingCatalog ? (
             <Spinner text="Loading catalog..." />
           ) : filteredCatalog.length === 0 ? (
@@ -297,23 +300,23 @@ const ProductSection = ({ totemId }) => {
                   key={product.id}
                   className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                     alreadyAdded
-                      ? 'bg-brand-600/8 border-brand-500/20'
-                      : 'bg-surface-800/50 border-surface-700/50 hover:border-surface-600'
+                      ? 'bg-brand-50 border-brand-100'
+                      : 'bg-white border-surface-200 hover:border-surface-300'
                   }`}
                 >
                   {product.image || product.thumbnail ? (
                     <img
                       src={product.image || product.thumbnail}
                       alt={product.name}
-                      className="w-10 h-10 rounded-lg object-cover border border-surface-700 shrink-0"
+                      className="w-10 h-10 rounded-lg object-cover border border-surface-200 shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-surface-700 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-lg bg-surface-100 border border-surface-200 flex items-center justify-center shrink-0">
                       <Package className="w-4 h-4 text-surface-500" />
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-surface-200 truncate">
+                    <p className="text-sm font-medium text-surface-800 truncate">
                       {product.name}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -321,7 +324,7 @@ const ProductSection = ({ totemId }) => {
                         <span className="text-xs text-surface-500">{product.category}</span>
                       )}
                       {product.price !== undefined && (
-                        <span className="text-xs font-medium text-brand-400">
+                        <span className="text-xs font-medium text-brand-600">
                           €{Number(product.price).toFixed(2)}
                         </span>
                       )}
@@ -329,10 +332,11 @@ const ProductSection = ({ totemId }) => {
                   </div>
                   <Button
                     size="sm"
-                    variant={alreadyAdded ? 'ghost' : 'primary'}
+                    variant={alreadyAdded ? 'secondary' : 'primary'}
                     disabled={alreadyAdded}
                     onClick={() => handleAddProduct(product)}
                     icon={alreadyAdded ? null : Plus}
+                    className={alreadyAdded ? 'bg-surface-100! text-surface-500! border-surface-200! shadow-none! hover:bg-surface-100! hover:border-surface-200!' : ''}
                   >
                     {alreadyAdded ? 'Added' : 'Add'}
                   </Button>

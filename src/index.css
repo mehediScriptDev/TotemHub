@@ -78,7 +78,7 @@
   .shadow-brand-500\/30 { box-shadow: 0 8px 20px -6px rgba(18,113,91,0.3) !important; }
 
   .animate-in {
-    animation: slideIn 0.4s ease-out forwards;
+    animation: none !important;
   }
 }
 

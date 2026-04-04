@@ -166,8 +166,8 @@ const VideoSection = ({ totemId }) => {
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-surface-100">Video Management</h2>
-          <p className="text-sm text-surface-400 mt-0.5">
+          <h2 className="text-lg md:text-xl font-semibold text-surface-900">Video Management</h2>
+          <p className="text-sm md:text-base text-surface-600">
             Upload and manage idle & rotating videos for this totem
           </p>
         </div>
@@ -182,37 +182,37 @@ const VideoSection = ({ totemId }) => {
           onClick={() => setFilterCategory('all')}
           className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${
             filterCategory === 'all'
-              ? 'bg-brand-600/12 border-brand-500/30'
-              : 'glass-card hover:border-surface-600'
+              ? 'bg-brand-50 border-brand-100'
+              : 'bg-white border-surface-200 hover:border-surface-300 shadow-[0_1px_2px_rgba(15,23,42,0.06)]'
           }`}
         >
-          <Video className={`w-5 h-5 mb-2 ${filterCategory === 'all' ? 'text-brand-400' : 'text-surface-500'}`} />
-          <p className="text-xl font-bold text-surface-100">{videos.length}</p>
-          <p className="text-xs text-surface-400">All Videos</p>
+          <Video className={`w-5 h-5 mb-2 ${filterCategory === 'all' ? 'text-brand-600' : 'text-surface-500'}`} />
+          <p className="text-xl font-bold text-surface-900">{videos.length}</p>
+          <p className="text-xs md:text-sm text-surface-600">All Videos</p>
         </button>
         <button
           onClick={() => setFilterCategory(VIDEO_CATEGORIES.IDLE)}
           className={`p-4 rounded-xl border transition-all cursor-pointer text-left ${
             filterCategory === VIDEO_CATEGORIES.IDLE
-              ? 'bg-warning-500/12 border-warning-500/30'
-              : 'glass-card hover:border-surface-600'
+              ? 'bg-amber-50 border-amber-200'
+              : 'bg-white border-surface-200 hover:border-surface-300 shadow-[0_1px_2px_rgba(15,23,42,0.06)]'
           }`}
         >
-          <Pause className={`w-5 h-5 mb-2 ${filterCategory === VIDEO_CATEGORIES.IDLE ? 'text-warning-500' : 'text-surface-500'}`} />
-          <p className="text-xl font-bold text-surface-100">{idleVideos.length}</p>
-          <p className="text-xs text-surface-400">Idle Videos</p>
+          <Pause className={`w-5 h-5 mb-2 ${filterCategory === VIDEO_CATEGORIES.IDLE ? 'text-amber-600' : 'text-surface-500'}`} />
+          <p className="text-xl font-bold text-surface-900">{idleVideos.length}</p>
+          <p className="text-xs md:text-sm text-surface-600">Idle Videos</p>
         </button>
         <button
           onClick={() => setFilterCategory(VIDEO_CATEGORIES.ROTATING)}
           className={`p-4 rounded-xl border transition-all cursor-pointer text-left col-span-2 sm:col-span-1 ${
             filterCategory === VIDEO_CATEGORIES.ROTATING
-              ? 'bg-brand-300/12 border-brand-300/30'
-              : 'glass-card hover:border-surface-600'
+              ? 'bg-brand-100 border-brand-300/30'
+              : 'bg-white border-surface-200 hover:border-surface-300 shadow-[0_1px_2px_rgba(15,23,42,0.06)]'
           }`}
         >
-          <RotateCcw className={`w-5 h-5 mb-2 ${filterCategory === VIDEO_CATEGORIES.ROTATING ? 'text-brand-300' : 'text-surface-500'}`} />
-          <p className="text-xl font-bold text-surface-100">{rotatingVideos.length}</p>
-          <p className="text-xs text-surface-400">Rotating Videos</p>
+          <RotateCcw className={`w-5 h-5 mb-2 ${filterCategory === VIDEO_CATEGORIES.ROTATING ? 'text-brand-600' : 'text-surface-500'}`} />
+          <p className="text-xl font-bold text-surface-900">{rotatingVideos.length}</p>
+          <p className="text-xs md:text-sm text-surface-600">Rotating Videos</p>
         </button>
       </div>
 
@@ -241,7 +241,7 @@ const VideoSection = ({ totemId }) => {
             return (
               <div
                 key={video.id}
-                className="glass-card rounded-xl p-4 flex items-center gap-4 group animate-fade-in"
+                className="bg-white border border-surface-200 rounded-xl p-4 flex items-center gap-4 group animate-fade-in shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 {/* Thumbnail / Icon */}
@@ -249,17 +249,17 @@ const VideoSection = ({ totemId }) => {
                   <img
                     src={video.thumbnail}
                     alt={video.name || video.filename}
-                    className="w-16 h-12 rounded-lg object-cover border border-surface-700 shrink-0"
+                    className="w-16 h-12 rounded-lg object-cover border border-surface-200 shrink-0"
                   />
                 ) : (
-                  <div className="w-16 h-12 rounded-lg bg-surface-800 border border-surface-700 flex items-center justify-center shrink-0">
+                  <div className="w-16 h-12 rounded-lg bg-surface-100 border border-surface-200 flex items-center justify-center shrink-0">
                     <FileVideo className="w-5 h-5 text-surface-500" />
                   </div>
                 )}
 
                 {/* Video Info */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-surface-200 truncate">
+                  <h4 className="text-sm font-medium text-surface-800 truncate">
                     {video.name || video.filename || `Video ${video.id}`}
                   </h4>
                   <div className="flex items-center gap-2 mt-1">
@@ -267,7 +267,7 @@ const VideoSection = ({ totemId }) => {
                       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                         video.category === VIDEO_CATEGORIES.IDLE
                           ? 'bg-warning-500/15 text-warning-500'
-                          : 'bg-brand-500/15 text-brand-400'
+                          : 'bg-brand-500/15 text-brand-600'
                       }`}
                     >
                       {video.category === VIDEO_CATEGORIES.IDLE ? (
@@ -291,8 +291,8 @@ const VideoSection = ({ totemId }) => {
                     <button
                       onClick={() => moveVideo(rotatingIndex, -1, rotatingVideos)}
                       disabled={rotatingIndex === 0}
-                      className="p-1.5 rounded-lg hover:bg-surface-700 text-surface-500
-                                 hover:text-surface-200 disabled:opacity-30 disabled:cursor-not-allowed
+                      className="p-1.5 rounded-lg hover:bg-surface-100 text-surface-500
+                                 hover:text-surface-800 disabled:opacity-30 disabled:cursor-not-allowed
                                  transition-colors cursor-pointer"
                       title="Move up"
                     >
@@ -301,8 +301,8 @@ const VideoSection = ({ totemId }) => {
                     <button
                       onClick={() => moveVideo(rotatingIndex, 1, rotatingVideos)}
                       disabled={rotatingIndex === rotatingVideos.length - 1}
-                      className="p-1.5 rounded-lg hover:bg-surface-700 text-surface-500
-                                 hover:text-surface-200 disabled:opacity-30 disabled:cursor-not-allowed
+                      className="p-1.5 rounded-lg hover:bg-surface-100 text-surface-500
+                                 hover:text-surface-800 disabled:opacity-30 disabled:cursor-not-allowed
                                  transition-colors cursor-pointer"
                       title="Move down"
                     >
@@ -331,18 +331,18 @@ const VideoSection = ({ totemId }) => {
       {uploadOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-black/45 backdrop-blur-xs animate-fade-in"
             onClick={() => !uploading && resetUploadForm()}
           />
-          <div className="relative w-full max-w-md bg-surface-900 border border-surface-700/50 rounded-2xl shadow-2xl animate-slide-up">
+          <div className="relative w-full max-w-md bg-white border border-surface-200 rounded-2xl shadow-2xl shadow-black/15 animate-slide-up">
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700/50">
-              <h3 className="text-lg font-semibold text-surface-100">Upload Video</h3>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200">
+              <h3 className="text-lg font-semibold text-surface-900">Upload Video</h3>
               {!uploading && (
                 <button
                   onClick={resetUploadForm}
-                  className="p-1.5 rounded-lg hover:bg-surface-800 text-surface-400
-                             hover:text-surface-200 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg hover:bg-surface-100 text-surface-500
+                             hover:text-surface-900 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -358,8 +358,8 @@ const VideoSection = ({ totemId }) => {
                   transition-all duration-200
                   ${
                     selectedFile
-                      ? 'border-brand-500/40 bg-brand-600/8'
-                      : 'border-surface-700 hover:border-surface-500 hover:bg-surface-800/40'
+                      ? 'border-brand-500/40 bg-brand-50'
+                      : 'border-surface-300 hover:border-brand-300 hover:bg-surface-50'
                   }
                 `}
               >
@@ -370,10 +370,10 @@ const VideoSection = ({ totemId }) => {
                   onChange={handleFileSelect}
                   className="hidden"
                 />
-                <Upload className={`w-8 h-8 mx-auto mb-3 ${selectedFile ? 'text-brand-400' : 'text-surface-500'}`} />
+                <Upload className={`w-8 h-8 mx-auto mb-3 ${selectedFile ? 'text-brand-600' : 'text-surface-500'}`} />
                 {selectedFile ? (
                   <>
-                    <p className="text-sm font-medium text-surface-200 truncate">
+                    <p className="text-sm font-medium text-surface-800 truncate">
                       {selectedFile.name}
                     </p>
                     <p className="text-xs text-surface-500 mt-1">
@@ -382,7 +382,7 @@ const VideoSection = ({ totemId }) => {
                   </>
                 ) : (
                   <>
-                    <p className="text-sm text-surface-300">
+                    <p className="text-sm text-surface-700">
                       Click to select a video file
                     </p>
                     <p className="text-xs text-surface-500 mt-1">
@@ -401,19 +401,20 @@ const VideoSection = ({ totemId }) => {
                 ]}
                 value={uploadCategory}
                 onChange={(e) => setUploadCategory(e.target.value)}
+                tone="light"
               />
 
               {/* Category Info */}
-              <div className="p-3 rounded-xl bg-surface-800/60 border border-surface-700/30">
-                <p className="text-xs text-surface-400 leading-relaxed">
+              <div className="p-3 rounded-xl bg-surface-50 border border-surface-200">
+                <p className="text-xs text-surface-600 leading-relaxed">
                   {uploadCategory === VIDEO_CATEGORIES.IDLE ? (
                     <>
-                      <span className="font-semibold text-warning-400">Idle videos</span>{' '}
+                      <span className="font-semibold text-amber-600">Idle videos</span>{' '}
                       play automatically when the totem is inactive.
                     </>
                   ) : (
                     <>
-                      <span className="font-semibold text-brand-400">Rotating videos</span>{' '}
+                      <span className="font-semibold text-brand-600">Rotating videos</span>{' '}
                       play continuously in a fixed loop. You can reorder them after upload.
                     </>
                   )}
@@ -433,6 +434,7 @@ const VideoSection = ({ totemId }) => {
                 <Button
                   type="button"
                   variant="secondary"
+                  className="bg-white! text-surface-700! border-surface-300! hover:bg-surface-50! hover:border-surface-400! shadow-none!"
                   onClick={resetUploadForm}
                   disabled={uploading}
                 >

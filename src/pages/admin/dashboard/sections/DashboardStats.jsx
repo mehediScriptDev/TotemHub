@@ -2,7 +2,7 @@ import React from 'react';
 import { Layers, Activity, Video, ShoppingBag } from 'lucide-react';
 
 const StatCard = ({ label, value, icon: Icon }) => (
-  <div className="bg-white px-5 py-4 rounded-2xl border border-surface-200 shadow-[0_1px_2px_rgba(15,23,42,0.08)] hover:shadow-[0_6px_14px_rgba(15,23,42,0.08)] transition-all animate-in flex items-center justify-between group">
+  <div className="bg-white px-5 py-4 lg:py-6 rounded-2xl border border-surface-200 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-all flex items-center justify-between group">
     <div className="space-y-1">
       <p className="text-[11px] font-medium text-surface-500 leading-none group-hover:text-surface-700 transition-colors">
         {label}
