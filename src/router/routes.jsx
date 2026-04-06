@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import AdminLayout from '../layout/AdminLayout';
 import ProtectedRoute from '../Components/common/ProtectedRoute';
-import LoginPage from '../pages/admin/login/LoginPage';
+import LoginPage from '../pages/login/LoginPage';
 import DashboardPage from '../pages/admin/dashboard/DashboardPage';
 import CreateTotemPage from '../pages/admin/create-totem/CreateTotemPage';
 import TotemDetailPage from '../pages/admin/totem-detail/TotemDetailPage';

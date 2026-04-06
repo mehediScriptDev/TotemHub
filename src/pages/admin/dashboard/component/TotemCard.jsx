@@ -216,10 +216,10 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
               {ownerInitial}
             </div>
             <div className="overflow-hidden">
-              <p className="text-[11px] font-semibold text-surface-800 truncate tracking-tight">
+              <p className="text-xs font-semibold text-surface-800 truncate tracking-tight">
                 {ownerName || '—'}
               </p>
-              <p className="text-[9px] font-medium text-surface-500 truncate tracking-tight">
+              <p className="text-xs font-medium text-surface-500 truncate tracking-tight">
                 {ownerEmail || '—'}
               </p>
             </div>

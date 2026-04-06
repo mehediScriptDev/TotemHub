@@ -4,8 +4,8 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
-import { useAuth } from "../../../hooks/useAuth";
-import { Button } from "../../../Components/ui";
+import { useAuth } from "../../hooks/useAuth";
+import { Button } from "../../Components/ui";
 import { toast } from "react-hot-toast";
 
 const LoginPage = () => {
