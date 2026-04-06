@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 
 const getProductId = (product) => product?.slug_id ?? product?.id ?? product?.slug;
 
-const ProductSection = ({ totemId }) => {
+const ProductSection = ({ totemId, isActive = true }) => {
   // ── Homepage Products State ──
   const [homepageProducts, setHomepageProducts] = useState([]);
   const [loadingHomepage, setLoadingHomepage] = useState(true);
@@ -50,8 +50,10 @@ const ProductSection = ({ totemId }) => {
   }, [totemId]);
 
   useEffect(() => {
-    fetchHomepageProducts();
-  }, [fetchHomepageProducts]);
+    if (isActive) {
+      fetchHomepageProducts();
+    }
+  }, [fetchHomepageProducts, isActive]);
 
   // ── Fetch categories once ──
   useEffect(() => {

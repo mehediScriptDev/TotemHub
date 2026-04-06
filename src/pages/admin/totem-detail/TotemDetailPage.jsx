@@ -102,8 +102,8 @@ const TotemDetailPage = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === 'products' && <ProductSection totemId={id} />}
-        {activeTab === 'videos' && <VideoSection totemId={id} />}
+        {activeTab === 'products' && <ProductSection totemId={id} isActive={true} />}
+        {activeTab === 'videos' && <VideoSection totemId={id} isActive={true} />}
       </div>
     </div>
   );

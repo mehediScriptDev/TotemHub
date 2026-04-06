@@ -8,7 +8,7 @@ import { videoService } from '../../../../services/videoService';
 import { VIDEO_CATEGORIES } from '../../../../config/constants';
 import toast from 'react-hot-toast';
 
-const VideoSection = ({ totemId }) => {
+const VideoSection = ({ totemId, isActive = true }) => {
   const getErrorMessage = (error, fallback) => {
     if (error?.message) return error.message;
 
@@ -26,7 +26,8 @@ const VideoSection = ({ totemId }) => {
 
   // ── Video State ──
   const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(isActive);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
   // ── Upload State ──
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -43,25 +44,35 @@ const VideoSection = ({ totemId }) => {
   // ── Active filter tab ──
   const [filterCategory, setFilterCategory] = useState('all');
 
-  // ── Fetch Videos ──
+  // ── Fetch Videos (Only when tab is active) ──
   const fetchVideos = useCallback(async () => {
+    if (!isActive) return;
     try {
       setLoading(true);
       const data = await videoService.getTotemVideos(totemId);
       setVideos(data?.videos || data || []);
       if (Array.isArray(data?.warnings) && data.warnings.length > 0) {
-        toast.error(data.warnings[0]);
+        const msg = data.warnings[0];
+        if (!msg.includes('Target class [admin]')) {
+          toast.error(msg);
+        }
       }
+      setHasLoadedOnce(true);
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Failed to load videos'));
+      const msg = getErrorMessage(error, 'Failed to load videos');
+      if (!msg.includes('Target class [admin]')) {
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
-  }, [totemId]);
+  }, [totemId, isActive]);
 
   useEffect(() => {
-    fetchVideos();
-  }, [fetchVideos]);
+    if (isActive && !hasLoadedOnce) {
+      fetchVideos();
+    }
+  }, [isActive, hasLoadedOnce, fetchVideos]);
 
   // ── Upload Handler ──
   const handleUpload = async () => {
