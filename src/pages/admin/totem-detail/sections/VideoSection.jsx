@@ -9,6 +9,21 @@ import { VIDEO_CATEGORIES } from '../../../../config/constants';
 import toast from 'react-hot-toast';
 
 const VideoSection = ({ totemId }) => {
+  const getErrorMessage = (error, fallback) => {
+    if (error?.message) return error.message;
+
+    const payload = error?.response?.data;
+    if (typeof payload === 'string') {
+      const adminBindingError = payload.match(/Target class \[admin\] does not exist\./i);
+      if (adminBindingError) return 'Backend middleware error: Target class [admin] does not exist.';
+
+      const titleMatch = payload.match(/<title>(.*?)<\/title>/i);
+      if (titleMatch?.[1]) return titleMatch[1].trim();
+    }
+
+    return payload?.message || fallback;
+  };
+
   // ── Video State ──
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,8 +49,11 @@ const VideoSection = ({ totemId }) => {
       setLoading(true);
       const data = await videoService.getTotemVideos(totemId);
       setVideos(data?.videos || data || []);
-    } catch {
-      toast.error('Failed to load videos');
+      if (Array.isArray(data?.warnings) && data.warnings.length > 0) {
+        toast.error(data.warnings[0]);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to load videos'));
     } finally {
       setLoading(false);
     }
@@ -60,14 +78,18 @@ const VideoSection = ({ totemId }) => {
         totemId,
         selectedFile,
         uploadCategory,
-        (progress) => setUploadProgress(progress)
+        (progress) => {
+          if (!progress?.total) return;
+          const percent = Math.min(100, Math.max(0, Math.round((progress.loaded / progress.total) * 100)));
+          setUploadProgress(percent);
+        }
       );
       const newVideo = result?.video || result;
-      setVideos((prev) => [...prev, newVideo]);
+      setVideos((prev) => [...prev, { ...newVideo, category: uploadCategory }]);
       toast.success('Video uploaded successfully!');
       resetUploadForm();
-    } catch {
-      toast.error('Video upload failed');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Video upload failed'));
     } finally {
       setUploading(false);
     }
@@ -104,11 +126,11 @@ const VideoSection = ({ totemId }) => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await videoService.delete(totemId, deleteTarget.id);
+      await videoService.delete(deleteTarget.id);
       setVideos((prev) => prev.filter((v) => v.id !== deleteTarget.id));
       toast.success('Video deleted');
-    } catch {
-      toast.error('Failed to delete video');
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to delete video'));
     } finally {
       setDeleting(false);
       setDeleteTarget(null);

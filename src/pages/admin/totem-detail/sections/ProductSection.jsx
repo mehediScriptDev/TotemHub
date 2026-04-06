@@ -7,6 +7,8 @@ import { Button, Spinner, EmptyState, Select, ConfirmDialog, Modal } from '../..
 import { productService } from '../../../../services/productService';
 import toast from 'react-hot-toast';
 
+const getProductId = (product) => product?.slug_id ?? product?.id ?? product?.slug;
+
 const ProductSection = ({ totemId }) => {
   // ── Homepage Products State ──
   const [homepageProducts, setHomepageProducts] = useState([]);
@@ -18,6 +20,8 @@ const ProductSection = ({ totemId }) => {
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({ category: '', status: '', search: '' });
+  const [catalogPage, setCatalogPage] = useState(1);
+  const catalogPageSize = 20;
 
   // ── Delete State ──
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -28,7 +32,16 @@ const ProductSection = ({ totemId }) => {
     try {
       setLoadingHomepage(true);
       const data = await productService.getTotemProducts(totemId);
-      setHomepageProducts(data?.products || data || []);
+      const products = (data?.products || data || []).map((product, index) => {
+        const productId = getProductId(product);
+        return {
+          ...product,
+          id: productId,
+          slug_id: productId,
+          order: Number.isFinite(Number(product?.order)) ? Number(product.order) : index,
+        };
+      });
+      setHomepageProducts(products);
     } catch {
       toast.error('Failed to load homepage products');
     } finally {
@@ -40,29 +53,32 @@ const ProductSection = ({ totemId }) => {
     fetchHomepageProducts();
   }, [fetchHomepageProducts]);
 
-  // ── Fetch catalog when modal opens ──
-  const fetchCatalog = useCallback(async () => {
-    try {
-      setLoadingCatalog(true);
-      const [productsData, catData] = await Promise.all([
-        productService.getCatalog(filters),
-        categories.length === 0 ? productService.getCategories() : Promise.resolve(null),
-      ]);
-      setCatalogProducts(productsData?.products || productsData || []);
-      if (catData) {
+  // ── Fetch categories once ──
+  useEffect(() => {
+    if (categories.length === 0) {
+      productService.getCategories().then((catData) => {
         setCategories(
           (catData?.categories || catData || []).map((c) => ({
             value: typeof c === 'string' ? c : c.id || c.value,
             label: typeof c === 'string' ? c : c.name || c.label,
           }))
         );
-      }
+      }).catch(() => console.error('Failed to load categories'));
+    }
+  }, [categories.length]);
+
+  // ── Fetch catalog when modal opens ──
+  const fetchCatalog = useCallback(async () => {
+    try {
+      setLoadingCatalog(true);
+      const productsData = await productService.getCatalog(filters);
+      setCatalogProducts(productsData?.products || productsData || []);
     } catch {
       toast.error('Failed to load product catalog');
     } finally {
       setLoadingCatalog(false);
     }
-  }, [filters, categories.length]);
+  }, [filters]);
 
   useEffect(() => {
     if (catalogOpen) fetchCatalog();
@@ -70,14 +86,21 @@ const ProductSection = ({ totemId }) => {
 
   // ── Add Product to Homepage ──
   const handleAddProduct = async (product) => {
+    const productId = getProductId(product);
+
+    if (productId === null || productId === undefined) {
+      toast.error('Invalid product id');
+      return;
+    }
+
     // Prevent duplicates
-    if (homepageProducts.some((p) => p.id === product.id)) {
+    if (homepageProducts.some((p) => String(getProductId(p)) === String(productId))) {
       toast.error('Product already on homepage');
       return;
     }
     try {
-      await productService.addToTotem(totemId, product.id);
-      setHomepageProducts((prev) => [...prev, product]);
+      await productService.addToTotem(totemId, productId);
+      setHomepageProducts((prev) => [...prev, { ...product, id: productId, slug_id: productId }]);
       toast.success(`"${product.name}" added to homepage`);
     } catch {
       toast.error('Failed to add product');
@@ -89,8 +112,9 @@ const ProductSection = ({ totemId }) => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await productService.removeFromTotem(totemId, deleteTarget.id);
-      setHomepageProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+      const targetId = getProductId(deleteTarget);
+      await productService.removeFromTotem(totemId, targetId);
+      setHomepageProducts((prev) => prev.filter((p) => String(getProductId(p)) !== String(targetId)));
       toast.success('Product removed');
     } catch {
       toast.error('Failed to remove product');
@@ -112,7 +136,7 @@ const ProductSection = ({ totemId }) => {
     try {
       await productService.reorderTotemProducts(
         totemId,
-        newList.map((p) => p.id)
+        newList.map((p) => getProductId(p))
       );
     } catch {
       toast.error('Failed to save order');
@@ -121,13 +145,25 @@ const ProductSection = ({ totemId }) => {
   };
 
   // ── Check if product is already on homepage ──
-  const isOnHomepage = (productId) => homepageProducts.some((p) => p.id === productId);
+  const isOnHomepage = (productId) => homepageProducts.some((p) => String(getProductId(p)) === String(productId));
 
   // ── Filter catalog by search ──
   const filteredCatalog = catalogProducts.filter(
     (p) =>
       !filters.search ||
       p.name?.toLowerCase().includes(filters.search.toLowerCase())
+  );
+
+  // ── Reset page when filters change ──
+  useEffect(() => {
+    setCatalogPage(1);
+  }, [filters]);
+
+  // ── Paginate filtered catalog ──
+  const totalPages = Math.ceil(filteredCatalog.length / catalogPageSize);
+  const paginatedCatalog = filteredCatalog.slice(
+    (catalogPage - 1) * catalogPageSize,
+    catalogPage * catalogPageSize
   );
 
   return (
@@ -163,7 +199,7 @@ const ProductSection = ({ totemId }) => {
         <div className="space-y-2">
           {homepageProducts.map((product, index) => (
             <div
-              key={product.id}
+              key={getProductId(product)}
               className="bg-white border border-surface-200 rounded-xl p-4 flex items-center gap-4 group animate-fade-in shadow-[0_1px_2px_rgba(15,23,42,0.06)]"
               style={{ animationDelay: `${index * 40}ms` }}
             >
@@ -188,7 +224,7 @@ const ProductSection = ({ totemId }) => {
               {/* Product Info */}
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-medium text-surface-800 truncate">
-                  {product.name}
+                  {product.name || `Product #${getProductId(product)}`}
                 </h4>
                 {product.category && (
                   <span className="text-xs text-surface-500">{product.category}</span>
@@ -293,11 +329,12 @@ const ProductSection = ({ totemId }) => {
               description="Try adjusting your filters."
             />
           ) : (
-            filteredCatalog.map((product) => {
-              const alreadyAdded = isOnHomepage(product.id);
+            paginatedCatalog.map((product) => {
+              const productId = getProductId(product);
+              const alreadyAdded = isOnHomepage(productId);
               return (
                 <div
-                  key={product.id}
+                  key={productId}
                   className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
                     alreadyAdded
                       ? 'bg-brand-50 border-brand-100'
@@ -317,7 +354,7 @@ const ProductSection = ({ totemId }) => {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-surface-800 truncate">
-                      {product.name}
+                      {product.name || `Product #${productId}`}
                     </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       {product.category && (
@@ -345,6 +382,41 @@ const ProductSection = ({ totemId }) => {
             })
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {filteredCatalog.length > catalogPageSize && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-200">
+            <span className="text-xs text-surface-600">
+              Showing {(catalogPage - 1) * catalogPageSize + 1}-{Math.min(
+                catalogPage * catalogPageSize,
+                filteredCatalog.length
+              )} of {filteredCatalog.length}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
+                disabled={catalogPage === 1}
+                className="px-3 py-1.5 rounded-lg border border-surface-300 text-surface-600
+                           disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50
+                           transition-colors text-sm font-medium"
+              >
+                Previous
+              </button>
+              <div className="text-xs text-surface-600 font-medium px-2">
+                Page {catalogPage} / {totalPages}
+              </div>
+              <button
+                onClick={() => setCatalogPage((p) => Math.min(totalPages, p + 1))}
+                disabled={catalogPage === totalPages}
+                className="px-3 py-1.5 rounded-lg border border-surface-300 text-surface-600
+                           disabled:opacity-40 disabled:cursor-not-allowed hover:bg-surface-50
+                           transition-colors text-sm font-medium"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </Modal>
 
       {/* Delete Confirmation */}
@@ -354,7 +426,7 @@ const ProductSection = ({ totemId }) => {
         onConfirm={handleRemoveProduct}
         loading={deleting}
         title="Remove Product?"
-        message={`Remove "${deleteTarget?.name}" from this totem's homepage?`}
+        message={`Remove "${deleteTarget?.name || `Product #${getProductId(deleteTarget)}`}" from this totem's homepage?`}
         confirmText="Remove"
       />
     </div>

@@ -43,9 +43,14 @@ const CreateTotemPage = () => {
           const userEmail = (user.email || user.email_address || '').toLowerCase();
           return userEmail === normalizedEmail;
         });
-        const matchedPartner = exactMatch || users[0];
-        setPartnerUser(matchedPartner);
-        toast.success(`Partner found: ${matchedPartner.name || matchedPartner.email || normalizedEmail}`);
+
+        if (!exactMatch) {
+          toast.error('No exact partner found with this email');
+          return;
+        }
+
+        setPartnerUser(exactMatch);
+        toast.success(`Partner found: ${exactMatch.name || exactMatch.email || normalizedEmail}`);
       } else {
         toast.error('No partner found with this email');
       }
@@ -67,19 +72,9 @@ const CreateTotemPage = () => {
     try {
       setLoading(true);
 
-      // Normalize partner user data so the fallback DB can persist useful owner info.
-      const nameParts = (partnerUser.first_name || partnerUser.name || '').split(' ').filter(Boolean);
-      const userPayload = {
-        first_name: partnerUser.first_name || nameParts[0] || '',
-        last_name: partnerUser.last_name || nameParts.slice(1).join(' ') || '',
-        email: partnerUser.email || partnerUser.email_address || partnerUser.partnerEmail || '',
-        name: partnerUser.name || `${partnerUser.first_name || ''} ${partnerUser.last_name || ''}`.trim(),
-      };
-
       await totemService.create({
         id_store: partnerUser.id,
         name: trimmedName,
-        user: userPayload,
       });
 
       toast.success('Totem created successfully!');
@@ -93,7 +88,7 @@ const CreateTotemPage = () => {
 
   return (
     <div className="flex h-full flex-col px-4 py-8 md:px-8 lg:px-12 lg:py-10">
-      <div className="mx-auto w-full max-w-[640px]">
+      <div className="mx-auto w-full max-w-160">
         <div className="mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => navigate('/')}
@@ -105,7 +100,7 @@ const CreateTotemPage = () => {
           <h1 className="text-2xl sm:text-[32px] font-extrabold tracking-tight text-[#12171f]">Create Totem</h1>
         </div>
 
-        <div className="rounded-[12px] border border-[#d7dde5] bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.04)] sm:p-8">
+        <div className="rounded-xl border border-[#d7dde5] bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.04)] sm:p-8">
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold text-[#262d36]">Totem Name</label>
@@ -119,7 +114,7 @@ const CreateTotemPage = () => {
                   placeholder="e.g., Main Entrance Kiosk"
                   autoComplete="off"
                   required
-                  className="block h-11 w-full rounded-[8px] border border-[#d4dbe5] bg-white pl-10 sm:pl-11 pr-4 text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] focus:border-[#8aa0bf]"
+                  className="block h-11 w-full rounded-lg border border-[#d4dbe5] bg-white pl-10 sm:pl-11 pr-4 text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] focus:border-[#8aa0bf]"
                 />
               </div>
             </div>
@@ -133,8 +128,10 @@ const CreateTotemPage = () => {
                 <input
                   value={formData.partnerEmail}
                   onChange={(e) => {
-                    setFormData({ ...formData, partnerEmail: e.target.value });
-                    if (partnerUser) setPartnerUser(null);
+                    const newEmail = e.target.value;
+                    setFormData({ ...formData, partnerEmail: newEmail });
+                    // Always clear old verification when email changes
+                    setPartnerUser(null);
                   }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -145,7 +142,7 @@ const CreateTotemPage = () => {
                   placeholder="Partner@example.com"
                   autoComplete="email"
                   required
-                  className={`block h-11 w-full rounded-[8px] bg-white pl-10 sm:pl-11 pr-[94px] sm:pr-[110px] text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] ${
+                  className={`block h-11 w-full rounded-lg bg-white pl-10 sm:pl-11 pr-23.5 sm:pr-27.5 text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] ${
                     partnerUser
                       ? 'border border-[#67a893] focus:border-[#4f8f7a]'
                       : 'border border-[#d4dbe5] focus:border-[#8aa0bf]'
@@ -158,7 +155,7 @@ const CreateTotemPage = () => {
                     type="button"
                     onClick={handleSearchPartner}
                     disabled={searching || !isEmailValid}
-                    className={`flex h-full items-center gap-1.5 rounded-[6px] px-2 sm:px-3 text-sm font-medium transition-colors disabled:opacity-60 ${
+                    className={`flex h-full items-center gap-1.5 rounded-md px-2 sm:px-3 text-sm font-medium transition-colors disabled:opacity-60 ${
                       partnerUser 
                         ? 'bg-[#edf7f4] text-[#2c6f60]' 
                         : 'text-[#3c4756] hover:bg-[#f8fafc]'
@@ -186,7 +183,7 @@ const CreateTotemPage = () => {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="inline-flex h-11 sm:h-10 w-full sm:w-auto items-center justify-center rounded-[8px] border border-[#d6dde6] bg-white px-6 text-sm font-medium text-[#1f2933] shadow-sm transition-colors hover:bg-[#f8fafc]"
+                className="inline-flex h-11 sm:h-10 w-full sm:w-auto items-center justify-center rounded-lg border border-[#d6dde6] bg-white px-6 text-sm font-medium text-[#1f2933] shadow-sm transition-colors hover:bg-[#f8fafc]"
               >
                 Cancel
               </button>
@@ -195,7 +192,7 @@ const CreateTotemPage = () => {
                 <button
                   type="submit"
                   disabled={!isCreateEnabled}
-                  className={`inline-flex h-11 sm:h-10 w-full sm:min-w-[130px] items-center justify-center rounded-[8px] border px-6 text-sm font-semibold text-white shadow-sm transition-colors disabled:cursor-not-allowed ${
+                  className={`inline-flex h-11 sm:h-10 w-full sm:min-w-32.5 items-center justify-center rounded-lg border px-6 text-sm font-semibold text-white shadow-sm transition-colors disabled:cursor-not-allowed ${
                     isCreateEnabled
                       ? 'border-[#257a65] bg-[#2f9078] hover:bg-[#257a65]'
                       : 'border-[#d0d7e2] bg-[#c9ced6]'
@@ -205,7 +202,7 @@ const CreateTotemPage = () => {
                 </button>
 
                 {!isCreateEnabled && !loading && (
-                  <span className="pointer-events-none absolute -top-10 left-1/2 z-10 w-max -translate-x-1/2 whitespace-nowrap rounded-[6px] bg-[#12171f] px-3 py-1.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  <span className="pointer-events-none absolute -top-10 left-1/2 z-10 w-max -translate-x-1/2 whitespace-nowrap rounded-md bg-[#12171f] px-3 py-1.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
                     {disabledReason}
                     <span className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-[#12171f]" />
                   </span>

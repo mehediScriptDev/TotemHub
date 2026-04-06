@@ -1,129 +1,170 @@
 import axiosInstance from './axiosInstance';
-import { db } from '../utils/db';
 
-/**
- * Product Service
- * - Primary: Real API calls (when available)
- * - Fallback: local db mock
- */
+const PRODUCT_API_BASE = (
+  import.meta.env.VITE_PRODUCT_API_BASE ||
+  'https://api-c.psicopatici.com/api/v1'
+).replace(/\/$/, '');
+
+const normalizeStatus = (status) => (status ? String(status).toLowerCase() : '');
+
+const getProductKey = (product) => (
+  product?.slug_id ??
+  product?.slugId ??
+  product?.slug ??
+  product?.id ??
+  product?.product_id ??
+  null
+);
+
+const normalizeCatalogItem = (product) => {
+  const slugId = getProductKey(product);
+  const categoryValue =
+    product?.category?.name ||
+    product?.category_name ||
+    product?.category ||
+    product?.taxonomy ||
+    '';
+
+  return {
+    ...product,
+    id: slugId,
+    slug_id: slugId,
+    name: product?.name || product?.title || `Product ${slugId ?? ''}`.trim(),
+    category: typeof categoryValue === 'string' ? categoryValue : '',
+    status: normalizeStatus(product?.status || product?.published_status || product?.visibility),
+  };
+};
+
+const normalizeCatalogPayload = (payload) => {
+  const productsArray = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.products)
+      ? payload.products
+      : Array.isArray(payload?.data)
+        ? payload.data
+        : [];
+
+  return productsArray.map(normalizeCatalogItem).filter((product) => product.id !== null && product.id !== undefined);
+};
+
+const normalizeHomepagePayload = (payload) => {
+  const products = Array.isArray(payload?.products)
+    ? payload.products
+    : Array.isArray(payload?.homepage?.products)
+      ? payload.homepage.products
+      : Array.isArray(payload)
+        ? payload
+        : [];
+
+  return products
+    .map((product, idx) => {
+      const slugId = getProductKey(product);
+      return {
+        ...product,
+        id: slugId,
+        slug_id: slugId,
+        order: Number.isFinite(Number(product?.order)) ? Number(product.order) : idx,
+      };
+    })
+    .filter((product) => product.id !== null && product.id !== undefined)
+    .sort((a, b) => a.order - b.order);
+};
+
+const saveHomepageProducts = async (totemId, products) => {
+  const payload = products.map((product, index) => ({
+    slug_id: getProductKey(product),
+    order: Number.isFinite(Number(product?.order)) ? Number(product.order) : index,
+  }));
+
+  const response = await axiosInstance.post(`/${totemId}/homepage`, { products: payload });
+  return response.data;
+};
+
 export const productService = {
-  /** Fetch product catalog (search) */
+  /** Product search from ecommerce API */
   getCatalog: async (filters = {}) => {
-    const q = filters.search || '';
-    const per_page = filters.per_page || 8;
+    const search = (filters.search || '').trim();
+    const perPage = filters.per_page || 8;
     const page = filters.page || 1;
 
-    const productApiBase = import.meta.env.VITE_PRODUCT_API_BASE;
+    const response = await axiosInstance.get(`${PRODUCT_API_BASE}/products/search`, {
+      params: {
+        q: search,
+        per_page: perPage,
+        page,
+      },
+    });
 
-    try {
-      const url = `${productApiBase}/products/search`;
-      const response = await axiosInstance.get(url, { params: { q, per_page, page } });
-      const payload = response.data;
+    let products = normalizeCatalogPayload(response.data);
 
-      if (Array.isArray(payload)) {
-        return { products: payload };
-      }
-
-      if (Array.isArray(payload?.products)) {
-        return payload;
-      }
-
-      if (Array.isArray(payload?.data)) {
-        return { ...payload, products: payload.data };
-      }
-
-      return { products: [] };
-    } catch (error) {
-      console.warn('Product search API failed, falling back to local catalog', error?.message || error);
-      try {
-        return { products: db.getCatalog ? db.getCatalog() : [] };
-      } catch {
-        return { products: [] };
-      }
+    if (filters.category) {
+      const normalizedCategory = String(filters.category).toLowerCase();
+      products = products.filter((product) => String(product.category || '').toLowerCase() === normalizedCategory);
     }
+
+    if (filters.status) {
+      const normalizedFilterStatus = normalizeStatus(filters.status);
+      products = products.filter((product) => normalizeStatus(product.status) === normalizedFilterStatus);
+    }
+
+    return {
+      products,
+      meta: response.data?.meta || null,
+    };
   },
 
-  /** Fetch categories (fallback) */
+  /** Categories derived from catalog results (no dedicated categories endpoint in docs) */
   getCategories: async () => {
-    // Backend categories endpoint not defined in docs — keep demo fallback
-    return new Promise((resolve) => setTimeout(() => resolve(['Electronics', 'Fashion', 'Accessories', 'Lifestyle']), 100));
+    const { products } = await productService.getCatalog({ search: '', per_page: 50, page: 1 });
+    const uniqueCategories = [...new Set(products.map((product) => product.category).filter(Boolean))];
+    return uniqueCategories;
   },
 
-  /** Fetch totem homepage products (expects backend to return full product objects or at least slug_id/order)
-   * GET /api/totems/{id}/homepage
-   */
+  /** GET /api/totems/{id}/homepage */
   getTotemProducts: async (totemId) => {
-    try {
-      const response = await axiosInstance.get(`/${totemId}/homepage`);
-      return response.data;
-    } catch (error) {
-      console.warn('Failed to fetch totem homepage from API, using local mock', error?.message || error);
-      try {
-        return { products: db.getTotemProducts ? db.getTotemProducts(totemId) : [] };
-      } catch {
-        return { products: [] };
-      }
-    }
+    const response = await axiosInstance.get(`/${totemId}/homepage`);
+    const products = normalizeHomepagePayload(response.data);
+    return {
+      ...(response.data && typeof response.data === 'object' && !Array.isArray(response.data) ? response.data : {}),
+      products,
+    };
   },
 
-  /** Add a product to the homepage by fetching current list and POSTing the full array
-   * POST /api/totems/{id}/homepage
-   */
+  /** Add a product slug to totem homepage and persist full ordered payload */
   addToTotem: async (totemId, productId) => {
-    try {
-      const current = await productService.getTotemProducts(totemId);
-      const products = (current?.products || []).slice();
+    const current = await productService.getTotemProducts(totemId);
+    const currentProducts = current.products || [];
+    const exists = currentProducts.some((product) => String(getProductKey(product)) === String(productId));
 
-      // Determine slug id field - backend uses `slug_id`
-      const existingSlugs = products.map((p) => p.slug_id ?? p.id ?? p.slug);
-      if (existingSlugs.includes(productId)) {
-        return { success: true, message: 'already_exists' };
-      }
-
-      const newProducts = products.map((p, idx) => ({ slug_id: p.slug_id ?? p.id ?? p.slug, order: p.order ?? idx }));
-      newProducts.push({ slug_id: productId, order: newProducts.length });
-
-      const res = await axiosInstance.post(`/${totemId}/homepage`, { products: newProducts });
-      return res.data;
-    } catch (error) {
-      console.warn('Failed to add product via API, falling back to mock', error?.message || error);
-      return { success: true };
+    if (exists) {
+      return { success: true, message: 'already_exists' };
     }
+
+    const nextProducts = [
+      ...currentProducts.map((product, idx) => ({ ...product, order: idx })),
+      { slug_id: productId, order: currentProducts.length },
+    ];
+
+    return saveHomepageProducts(totemId, nextProducts);
   },
 
-  /** Remove product from homepage */
+  /** Remove product slug from totem homepage and persist full ordered payload */
   removeFromTotem: async (totemId, productId) => {
-    try {
-      const current = await productService.getTotemProducts(totemId);
-      const products = (current?.products || []).slice();
+    const current = await productService.getTotemProducts(totemId);
+    const currentProducts = current.products || [];
 
-      const filtered = products
-        .map((p, idx) => ({ slug_id: p.slug_id ?? p.id ?? p.slug, order: p.order ?? idx }))
-        .filter((p) => String(p.slug_id) !== String(productId))
-        .map((p, idx) => ({ slug_id: p.slug_id, order: idx }));
+    const nextProducts = currentProducts
+      .filter((product) => String(getProductKey(product)) !== String(productId))
+      .map((product, idx) => ({ ...product, order: idx }));
 
-      const res = await axiosInstance.post(`/${totemId}/homepage`, { products: filtered });
-      return res.data;
-    } catch (error) {
-      console.warn('Failed to remove product via API, falling back to mock', error?.message || error);
-      return { success: true };
-    }
+    return saveHomepageProducts(totemId, nextProducts);
   },
 
-  /** Reorder homepage products by providing an ordered array of product ids
-   * Accepts array of slug ids in the desired order
-   */
+  /** Persist ordered slug list to backend */
   reorderTotemProducts: async (totemId, productIds = []) => {
-    try {
-      const products = productIds.map((id, idx) => ({ slug_id: id, order: idx }));
-      const res = await axiosInstance.post(`/${totemId}/homepage`, { products });
-      return res.data;
-    } catch (error) {
-      console.warn('Failed to reorder homepage via API, falling back to mock', error?.message || error);
-      return { success: true };
-    }
+    const orderedProducts = productIds.map((productId, index) => ({ slug_id: productId, order: index }));
+    return saveHomepageProducts(totemId, orderedProducts);
   },
 
-  // backward-compatible alias
   reorder: async (totemId, productIds = []) => productService.reorderTotemProducts(totemId, productIds),
 };
