@@ -6,26 +6,38 @@ import {
   Video, 
   ShoppingBag
 } from 'lucide-react';
-import { Button, ConfirmDialog } from '../../../../Components/ui';
+import { Button } from '../../../../Components/ui';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import { totemService } from '../../../../services/totemService';
 import { toast } from 'react-hot-toast';
 
 const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
   const navigate = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const confirmDelete = async () => {
+    const result = await Swal.fire({
+      title: `Permanently remove "${totem.name}"?`,
+      text: 'This action is irreversible.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          await totemService.delete(totem.id);
+        } catch (err) {
+          Swal.showValidationMessage(`Request failed: ${err?.message || 'Failed to delete'}`);
+          throw err;
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
 
-  const handleDelete = async () => {
-    try {
-      setDeleting(true);
-      await totemService.delete(totem.id);
+    if (result.isConfirmed) {
       toast.success('Totem deleted');
       onDeleted?.();
-    } catch (error) {
-      toast.error('Failed to delete');
-    } finally {
-      setDeleting(false);
-      setShowConfirm(false);
     }
   };
 
@@ -121,7 +133,7 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
             </Button>
             
             <button
-              onClick={() => setShowConfirm(true)}
+              onClick={() => confirmDelete()}
               className="p-2.5 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all hover:shadow-sm"
               title="Delete Totem"
               aria-label="Delete totem"
@@ -145,16 +157,7 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
           </div>
         </div>
 
-        <ConfirmDialog
-          isOpen={showConfirm}
-          onClose={() => setShowConfirm(false)}
-          onConfirm={handleDelete}
-          title="Delete Totem"
-          message={`Permanently remove "${totem.name}"? This action is irreversible.`}
-          confirmText={deleting ? 'Deleting...' : 'Delete'}
-          loading={deleting}
-          variant="danger"
-        />
+        {/* handled via SweetAlert2 */}
       </div>
     );
   }
@@ -177,7 +180,7 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
             <button
-              onClick={() => setShowConfirm(true)}
+              onClick={() => confirmDelete()}
               className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
               title="Delete Totem"
             >
@@ -233,16 +236,7 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
         </div>
       </div>
 
-      <ConfirmDialog
-        isOpen={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        onConfirm={handleDelete}
-        title="Delete Totem"
-        message={`Permanently remove "${totem.name}"? This action is irreversible.`}
-        confirmText={deleting ? 'Deleting...' : 'Delete'}
-        loading={deleting}
-        variant="danger"
-      />
+        {/* handled via SweetAlert2 */}
     </div>
   );
 };

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router';
 import { Plus, Search, Grid3x3, List, ShoppingBag, Trash2 } from 'lucide-react';
 import { totemService } from '../../../services/totemService';
 import { Button, Spinner, EmptyState } from '../../../Components/ui';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import TotemCard from './component/TotemCard';
 import DashboardStats from './sections/DashboardStats';
 import { toast } from 'react-hot-toast';
@@ -63,6 +65,33 @@ const DashboardPage = () => {
   }, [searchQuery]);
 
   const paginatedTotems = filteredTotems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleDeleteClick = async (totem) => {
+    const result = await Swal.fire({
+      title: `Permanently remove "${totem.name}"?`,
+      text: 'This action is irreversible.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      showLoaderOnConfirm: true,
+      preConfirm: async () => {
+        try {
+          await totemService.delete(totem.id);
+        } catch (err) {
+          Swal.showValidationMessage(`Request failed: ${err?.message || 'Failed to delete'}`);
+          throw err;
+        }
+      },
+      allowOutsideClick: () => !Swal.isLoading(),
+    });
+
+    if (result.isConfirmed) {
+      toast.success('Totem deleted');
+      fetchTotems();
+    }
+  };
 
   // Helper to normalize owner info from different API/local shapes
   const getOwner = (t) => {
@@ -215,17 +244,7 @@ const DashboardPage = () => {
                           <div className="flex items-center justify-end gap-2">
                             <Button size="sm" className="bg-brand-600 text-white" onClick={() => navigate(`/totem/${totem.id}`)}>Manage</Button>
                             <button
-                              onClick={async () => {
-                                if (!window.confirm(`Permanently remove "${totem.name}"? This action is irreversible.`)) return;
-                                try {
-                                  await totemService.delete(totem.id);
-                                  toast.success('Totem deleted');
-                                  fetchTotems();
-                                } catch (err) {
-                                  toast.error('Failed to delete');
-                                  console.error(err);
-                                }
-                              }}
+                              onClick={() => handleDeleteClick(totem)}
                               className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
                               title="Delete Totem"
                             >
