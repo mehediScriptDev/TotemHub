@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router';
 import AdminLayout from '../layout/AdminLayout';
+import VideoManagementPage from '../pages/admin/videos/VideoManagementPage';
 import ProtectedRoute from '../Components/common/ProtectedRoute';
 import LoginPage from '../pages/login/LoginPage';
 import DashboardPage from '../pages/admin/dashboard/DashboardPage';
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: 'totem/new',
         element: <CreateTotemPage />,
+      },
+      {
+        path: 'videos',
+        element: <VideoManagementPage />,
       },
       {
         path: 'totem/:id',

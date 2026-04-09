@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, Check, Search, User, Layout, Loader2 } from 'lucide-react';
+import { ArrowLeft, Check, Search, User, Layout, Loader2, Monitor, ShieldCheck, Cpu, Sparkles, Send } from 'lucide-react';
 import { totemService } from '../../../services/totemService';
 import { toast } from 'react-hot-toast';
 
@@ -21,15 +21,15 @@ const CreateTotemPage = () => {
   const isCreateEnabled = Boolean(partnerUser) && trimmedName.length > 0 && !loading;
 
   const disabledReason = useMemo(() => {
-    if (!trimmedName) return 'Totem name is required';
-    if (!isEmailValid) return 'Enter a valid partner email';
-    if (!partnerUser) return 'Verification Required';
+    if (!trimmedName) return 'Node Label Required';
+    if (!isEmailValid) return 'Enter Partner Uplink';
+    if (!partnerUser) return 'Verify Identity First';
     return '';
   }, [trimmedName, isEmailValid, partnerUser]);
 
   const handleSearchPartner = async () => {
     if (!isEmailValid) {
-      toast.error('Please enter a valid email');
+      toast.error('INVALID UPLINK PROTOCOL');
       return;
     }
 
@@ -45,17 +45,17 @@ const CreateTotemPage = () => {
         });
 
         if (!exactMatch) {
-          toast.error('No exact partner found with this email');
+          toast.error('NODE IDENTITY MISMATCH');
           return;
         }
 
         setPartnerUser(exactMatch);
-        toast.success(`Partner found: ${exactMatch.name || exactMatch.email || normalizedEmail}`);
+        toast.success(`IDENTITY VERIFIED: ${exactMatch.name || exactMatch.email}`);
       } else {
-        toast.error('No partner found with this email');
+        toast.error('IDENTITY RECORD NOT FOUND');
       }
-    } catch (err) {
-      toast.error('Search failed');
+    } catch {
+      toast.error('DATABASE SYNCHRONIZATION ERROR');
     } finally {
       setSearching(false);
     }
@@ -63,149 +63,163 @@ const CreateTotemPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!partnerUser) {
-      toast.error('Please search and verify a partner first');
-      return;
-    }
+    if (!partnerUser) return;
 
     try {
       setLoading(true);
-
       await totemService.create({
         id_store: partnerUser.id,
         name: trimmedName,
       });
 
-      toast.success('Totem created successfully!');
-      setTimeout(() => navigate('/'), 200);
+      toast.success('TERMINAL DEPLOYMENT INITIALIZED');
+      setTimeout(() => navigate('/'), 800);
     } catch (err) {
-      toast.error(err?.response?.data?.message || 'Failed to create totem');
+      toast.error('PROVISIONING HANDSHAKE FAILED');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex h-full flex-col px-4 py-8 md:px-8 lg:px-12 lg:py-10">
-      <div className="mx-auto w-full max-w-160">
-        <div className="mb-6 sm:mb-8 flex items-center gap-3 sm:gap-4">
+    <div className="w-full max-w-5xl mx-auto animate-slow-fade pb-20">
+      {/* Studio Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-10 mb-16">
+        <div className="flex items-center gap-10">
           <button
             onClick={() => navigate('/')}
-            className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-[10px] border border-[#d5dbe4] bg-white text-[#5f6975] shadow-sm transition-all hover:bg-[#f8fafc] hover:text-[#12171f]"
-            aria-label="Back"
+            className="w-20 h-20 flex items-center justify-center rounded-[2rem] bg-white border border-slate-100 text-slate-400 hover:text-brand-500 hover:border-brand-500 transition-all duration-500 group shadow-premium"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="w-8 h-8 group-hover:-translate-x-2 transition-transform" />
           </button>
-          <h1 className="text-2xl sm:text-[32px] font-extrabold tracking-tight text-[#12171f]">Create Totem</h1>
+          <div className="space-y-1">
+            <h1 className="text-5xl font-black text-slate-900 tracking-tighter uppercase mb-1">Deployment</h1>
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Initialize Terminal Provisioning Sequence</p>
+          </div>
         </div>
+        
+        <div className="px-8 py-4 rounded-[1.5rem] bg-white border border-slate-100 flex items-center gap-6 shadow-premium">
+           <div className="p-3 rounded-2xl bg-brand-50 transition-colors group-hover:bg-brand-100"><Cpu className="w-7 h-7 text-brand-500" /></div>
+           <div className="space-y-0.5">
+             <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest leading-tight">Handshake Mode</p>
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Priority Direct Link</p>
+           </div>
+        </div>
+      </div>
 
-        <div className="rounded-xl border border-[#d7dde5] bg-white p-5 shadow-[0_8px_28px_rgba(15,23,42,0.04)] sm:p-8">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-[#262d36]">Totem Name</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                  <Layout className="h-5 w-5 text-[#a1aab6]" />
+      <div className="grid grid-cols-1 gap-12">
+        <div className="bg-white border border-slate-100 rounded-[3.5rem] p-10 lg:p-20 shadow-premium relative overflow-hidden group">
+          {/* Subtle decoration */}
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+          
+          <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+              {/* Node ID Field */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-slate-50 text-brand-500 shadow-sm"><Layout className="w-5 h-5" /></div>
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Identification Label</label>
                 </div>
                 <input
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Main Entrance Kiosk"
-                  autoComplete="off"
+                  placeholder="E.G. TERMINAL-72-BETA"
                   required
-                  className="block h-11 w-full rounded-lg border border-[#d4dbe5] bg-white pl-10 sm:pl-11 pr-4 text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] focus:border-[#8aa0bf]"
+                  className="w-full h-24 px-10 bg-slate-50 border border-slate-100 rounded-[2rem] text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl outline-none transition-all duration-500"
                 />
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] pl-4 opacity-60 flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-accent-500" />
+                  Global Broadcast Node Identity
+                </p>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold text-[#262d36]">Partner Email Verification</label>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                  <User className="h-5 w-5 text-[#a1aab6]" />
+              {/* Partner verification field */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-xl bg-slate-50 text-accent-600 shadow-sm"><User className="w-5 h-5" /></div>
+                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">Partner Uplink Protocol</label>
                 </div>
-                <input
-                  value={formData.partnerEmail}
-                  onChange={(e) => {
-                    const newEmail = e.target.value;
-                    setFormData({ ...formData, partnerEmail: newEmail });
-                    // Always clear old verification when email changes
-                    setPartnerUser(null);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleSearchPartner();
-                    }
-                  }}
-                  placeholder="Partner@example.com"
-                  autoComplete="email"
-                  required
-                  className={`block h-11 w-full rounded-lg bg-white pl-10 sm:pl-11 pr-23.5 sm:pr-27.5 text-sm text-[#212a33] outline-none transition-colors placeholder:text-[#8f97a3] ${
-                    partnerUser
-                      ? 'border border-[#67a893] focus:border-[#4f8f7a]'
-                      : 'border border-[#d4dbe5] focus:border-[#8aa0bf]'
-                  }`}
-                />
-
-                <div className="absolute inset-y-1.5 right-1.5 sm:inset-y-2 sm:right-2 flex items-center">
-                  <div className="mr-1.5 sm:mr-2 h-5 w-px bg-[#d7dde6]" />
+                <div className="relative group/search">
+                  <input
+                    value={formData.partnerEmail}
+                    onChange={(e) => {
+                      setFormData({ ...formData, partnerEmail: e.target.value });
+                      setPartnerUser(null);
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearchPartner())}
+                    placeholder="UPLINK@ACCOUNT.COM"
+                    required
+                    className={`w-full h-24 px-10 pr-40 bg-slate-50 border rounded-[2rem] text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 outline-none transition-all duration-500 ${partnerUser ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-slate-100 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl'}`}
+                  />
                   <button
                     type="button"
                     onClick={handleSearchPartner}
                     disabled={searching || !isEmailValid}
-                    className={`flex h-full items-center gap-1.5 rounded-md px-2 sm:px-3 text-sm font-medium transition-colors disabled:opacity-60 ${
-                      partnerUser 
-                        ? 'bg-[#edf7f4] text-[#2c6f60]' 
-                        : 'text-[#3c4756] hover:bg-[#f8fafc]'
-                    }`}
+                    className={`absolute right-4 top-4 bottom-4 px-10 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 ${partnerUser ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'bg-slate-900 text-white hover:bg-brand-600 shadow-xl shadow-slate-900/10'}`}
                   >
-                    {searching ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-[#6c7682]" />
-                    ) : (
-                      <>
-                        <span>{partnerUser ? 'Verified' : 'Verify'}</span>
-                        <Search className="h-4 w-4" />
-                      </>
-                    )}
+                    {searching ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (partnerUser ? 'Identity Verified' : 'Verify Uplink')}
                   </button>
                 </div>
+                <div className="flex items-center gap-3 pl-4">
+                  {partnerUser ? (
+                    <>
+                      <ShieldCheck className="w-5 h-5 text-emerald-500" />
+                      <span className="text-[11px] font-black text-emerald-600 uppercase tracking-widest">Master record located: {partnerUser.name || partnerUser.email}</span>
+                    </>
+                  ) : (
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] opacity-40">Cross-reference with secure studio registry</span>
+                  )}
+                </div>
               </div>
-              <p className={`pl-1 text-[13px] ${partnerUser ? 'font-medium text-[#2c6f60]' : 'text-[#6c7682]'}`}>
-                {partnerUser
-                  ? `Verified: ${partnerUser.name || partnerUser.email || normalizedEmail}`
-                  : 'A valid, verified partner email is required for registration.'}
-              </p>
             </div>
 
-            <div className="mt-4 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 border-t border-[#edf1f5] pt-6">
+            {/* Strategy Card */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 bg-slate-50/50 p-8 lg:p-12 rounded-[3rem] border border-slate-100 group-hover:bg-white group-hover:shadow-xl transition-all duration-700">
+              <div className="md:col-span-3 lg:col-span-2 flex justify-center">
+                 <div className="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center border border-slate-100 shadow-2xl relative">
+                    <Monitor className="w-10 h-10 text-brand-500" />
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-brand-500 rounded-full animate-ping" />
+                 </div>
+              </div>
+              <div className="md:col-span-9 lg:col-span-10 space-y-4">
+                 <h4 className="text-xl font-black text-slate-900 uppercase tracking-tight">Deployment Strategy: Automated Provisions</h4>
+                 <p className="text-sm text-slate-500 font-bold leading-relaxed uppercase tracking-widest opacity-70">
+                   Initializing direct link to global broadcast network. System will automatically propagate media assets and catalog items upon successful handshake. Provisioning may take up to 300ms following protocol confirmation.
+                 </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-8 pt-12 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="inline-flex h-11 sm:h-10 w-full sm:w-auto items-center justify-center rounded-lg border border-[#d6dde6] bg-white px-6 text-sm font-medium text-[#1f2933] shadow-sm transition-colors hover:bg-[#f8fafc]"
+                className="w-full sm:w-auto px-16 py-6 h-auto rounded-[2rem] border border-slate-100 bg-white text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-slate-50 hover:text-slate-900 transition-all duration-500"
               >
-                Cancel
+                Abort Sequence
               </button>
 
-              <div className="group relative w-full sm:w-auto">
+              <div className="relative w-full sm:w-auto overflow-visible group/btn">
                 <button
                   type="submit"
                   disabled={!isCreateEnabled}
-                  className={`inline-flex h-11 sm:h-10 w-full sm:min-w-32.5 items-center justify-center rounded-lg border px-6 text-sm font-semibold text-white shadow-sm transition-colors disabled:cursor-not-allowed ${
-                    isCreateEnabled
-                      ? 'border-[#257a65] bg-[#2f9078] hover:bg-[#257a65]'
-                      : 'border-[#d0d7e2] bg-[#c9ced6]'
-                  }`}
+                  className="w-full sm:w-[400px] h-24 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl shadow-slate-900/10 disabled:opacity-30 transition-all duration-500 group/inner relative overflow-hidden"
                 >
-                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Totem'}
+                  <div className="absolute inset-0 bg-gradient-premium opacity-0 group-hover/inner:opacity-100 transition-opacity duration-700" />
+                  {loading ? (
+                     <Loader2 className="w-8 h-8 animate-spin relative z-10 mx-auto" />
+                  ) : (
+                    <div className="flex items-center justify-center gap-6 relative z-10">
+                      <span>Sync Core Link</span>
+                      <Send className="w-6 h-6 group-hover/inner:translate-x-2' group-hover/inner:-translate-y-2 transition-transform duration-500" />
+                    </div>
+                  )}
                 </button>
 
                 {!isCreateEnabled && !loading && (
-                  <span className="pointer-events-none absolute -top-10 left-1/2 z-10 w-max -translate-x-1/2 whitespace-nowrap rounded-md bg-[#12171f] px-3 py-1.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-8 px-8 py-3 bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl opacity-0 group-hover/btn:opacity-100 transition-all duration-500 pointer-events-none whitespace-nowrap shadow-2xl border border-white/5">
                     {disabledReason}
-                    <span className="absolute -bottom-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rotate-45 bg-[#12171f]" />
-                  </span>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-900 rotate-45 -translate-y-2" />
+                  </div>
                 )}
               </div>
             </div>

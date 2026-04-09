@@ -1,10 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router';
 import { 
   Trash2, 
   ChevronRight, 
   Video, 
-  ShoppingBag
+  ShoppingBag,
+  Monitor,
+  MoreVertical,
+  Activity,
+  ArrowRight,
+  Terminal,
+  ShieldCheck,
+  Zap
 } from 'lucide-react';
 import { Button } from '../../../../Components/ui';
 import Swal from 'sweetalert2';
@@ -14,21 +21,32 @@ import { toast } from 'react-hot-toast';
 
 const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
   const navigate = useNavigate();
-  const confirmDelete = async () => {
+
+  const confirmDelete = async (e) => {
+    e.stopPropagation();
     const result = await Swal.fire({
-      title: `Permanently remove "${totem.name}"?`,
-      text: 'This action is irreversible.',
+      title: 'Remove Terminal?',
+      text: `Confirm permanent removal of "${totem.name}" from the studio network.`,
       icon: 'warning',
+      background: '#ffffff',
+      color: '#0f172a',
       showCancelButton: true,
-      confirmButtonText: 'Delete',
+      confirmButtonText: 'Yes, Decommission',
       cancelButtonText: 'Cancel',
+      confirmButtonColor: '#f43f5e',
+      cancelButtonColor: '#f1f5f9',
+      customClass: {
+        popup: 'rounded-[2rem] border-none shadow-premium',
+        confirmButton: 'rounded-xl font-black uppercase text-[10px] tracking-widest px-8 py-3',
+        cancelButton: 'rounded-xl font-black uppercase text-[10px] tracking-widest px-8 py-3 text-slate-500'
+      },
       reverseButtons: true,
       showLoaderOnConfirm: true,
       preConfirm: async () => {
         try {
           await totemService.delete(totem.id);
         } catch (err) {
-          Swal.showValidationMessage(`Request failed: ${err?.message || 'Failed to delete'}`);
+          Swal.showValidationMessage(`Protocol Error: ${err?.message || 'Access Denied'}`);
           throw err;
         }
       },
@@ -36,207 +54,163 @@ const TotemCard = ({ totem, onDeleted, viewMode = 'grid' }) => {
     });
 
     if (result.isConfirmed) {
-      toast.success('Totem deleted');
+      toast.success('DECOMMISSION SUCCESSFUL');
       onDeleted?.();
     }
   };
 
-  // Owner fallbacks: support both `user.first_name/last_name/email` and
-  // older `user.name` or `partnerEmail` fields. This keeps newly-created
-  // totems (saved to local DB) showing owner info if provided.
-  const ownerName = totem.user
-    ? (totem.user.first_name ? `${totem.user.first_name}${totem.user.last_name ? ' ' + totem.user.last_name : ''}` : (totem.user.name || ''))
-    : (totem.partnerEmail || '');
+  const getOwner = () => {
+    const user = totem.user || null;
+    const name = user ? (user.first_name ? `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}` : (user.name || '')) : '';
+    const email = (user && (user.email || user.email_address)) || totem.partnerEmail || '';
+    const initial = (name ? name.charAt(0) : (totem.name ? totem.name.charAt(0) : 'P')).toUpperCase();
+    return { name, email, initial };
+  };
 
-  const ownerEmail = totem.user?.email || totem.partnerEmail || '';
-
-  const ownerInitial = (
-    (totem.user?.first_name && totem.user.first_name.charAt(0)) ||
-    (totem.user?.name && totem.user.name.charAt(0)) ||
-    (ownerName && ownerName.charAt(0)) ||
-    (totem.name && totem.name.charAt(0)) ||
-    'P'
-  ).toUpperCase();
+  const { name: ownerName, email: ownerEmail, initial: ownerInitial } = getOwner();
 
   if (viewMode === 'list') {
     return (
-      <div className="group relative overflow-hidden rounded-2xl bg-white border border-surface-200/80 shadow-[0_1px_3px_rgba(15,23,42,0.08)] hover:shadow-[0_8px_24px_rgba(15,23,42,0.12)] hover:border-surface-300 transition-all duration-200">
-        {/* Accent left border on hover */}
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-linear-to-b from-brand-600 to-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-        
-        <div className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          {/* Primary Info: Icon + Totem Details */}
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="w-14 h-14 rounded-full bg-surface-50 flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md transition-all">
-              <ShoppingBag className="w-7 h-7 text-brand-600" />
+      <div 
+        onClick={() => navigate(`/totem/${totem.id}`)}
+        className="group relative bg-white border border-slate-100 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-8 hover:shadow-premium hover:border-brand-100 transition-all duration-500 cursor-pointer mb-4"
+      >
+        <div className="flex items-center gap-6 flex-1 min-w-0">
+          <div className="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 shadow-sm group-hover:shadow-lg group-hover:bg-white">
+            <Monitor className="w-7 h-7 text-brand-500" />
+          </div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-black text-slate-900 truncate tracking-tight uppercase leading-none">{totem.name || 'Unnamed Device'}</h3>
+              <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-base text-surface-900 group-hover:text-surface-800 transition-colors truncate leading-snug">
-                {totem.name || 'Unnamed Totem'}
-              </h3>
-              <p className="text-xs text-surface-500 font-medium mt-1 truncate">
-                Store ID: <span className="text-surface-600 font-semibold">{totem.id_store}</span>
-              </p>
+            <p className="text-[10px] text-slate-400 font-black tracking-widest uppercase">NODE ID: {totem.id_store || 'GEN-842'}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-12 px-10 border-l border-slate-100 hidden lg:flex">
+          <div className="space-y-1">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Media Queue</p>
+            <div className="flex items-center gap-2">
+               <Video className="w-3.5 h-3.5 text-indigo-500" />
+               <p className="text-lg font-black text-slate-900 leading-none">{totem.videoCount || 0}</p>
             </div>
           </div>
-
-          {/* Secondary Info: Stats (Desktop) */}
-          <div className="hidden lg:flex items-center gap-8 px-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-surface-50 border border-surface-200 flex items-center justify-center">
-                <Video className="w-5 h-5 text-surface-600" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-surface-500 uppercase tracking-wider">Videos</p>
-                <p className="text-base font-bold text-surface-900">
-                  {(totem.videoCount !== undefined) ? totem.videoCount : '—'}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-surface-50 border border-surface-200 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-surface-600" />
-              </div>
-              <div>
-                <p className="text-[11px] font-semibold text-surface-500 uppercase tracking-wider">Products</p>
-                <p className="text-base font-bold text-surface-900">
-                  {(totem.productCount !== undefined) ? totem.productCount : '—'}
-                </p>
-              </div>
+          <div className="space-y-1">
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Catalog</p>
+            <div className="flex items-center gap-2">
+               <ShoppingBag className="w-3.5 h-3.5 text-emerald-500" />
+               <p className="text-lg font-black text-slate-900 leading-none">{totem.productCount || 0}</p>
             </div>
           </div>
-
-          {/* Tertiary Info: User (Desktop) */}
-          <div className="hidden sm:flex items-center gap-3 px-2 border-l border-surface-200/60">
-            <div className="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center text-white text-sm font-bold shrink-0 shadow-md shadow-brand-500/20 uppercase">
+          <div className="flex items-center gap-4 ml-6">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-900 to-slate-700 flex items-center justify-center text-white text-[10px] font-black border-4 border-white shadow-xl">
               {ownerInitial}
             </div>
-            <div className="min-w-0 hidden lg:block">
-              <p className="text-sm font-semibold text-surface-900 truncate leading-tight">
-                {ownerName || '—'}
-              </p>
-              <p className="text-xs text-surface-500 truncate leading-tight">
-                {ownerEmail || '—'}
-              </p>
+            <div>
+              <p className="text-[11px] font-black text-slate-900 leading-tight uppercase truncate max-w-[120px]">{ownerName || 'Direct Partner'}</p>
+              <p className="text-[9px] text-slate-400 font-bold truncate max-w-[120px]">{ownerEmail}</p>
             </div>
           </div>
-
-          {/* Actions: Right Side */}
-          <div className="flex items-center gap-2 shrink-0 sm:border-l sm:border-surface-200/60 sm:pl-3">
-            <Button
-              size="sm"
-              className="bg-brand-600 hover:bg-brand-700 text-white px-4! font-semibold shadow-md shadow-brand-600/20 hover:shadow-lg hover:shadow-brand-600/30 transition-all"
-              onClick={() => navigate(`/totem/${totem.id}`)}
-            >
-              <ChevronRight className="w-4 h-4" />
-              Manage
-            </Button>
-            
-            <button
-              onClick={() => confirmDelete()}
-              className="p-2.5 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all hover:shadow-sm"
-              title="Delete Totem"
-              aria-label="Delete totem"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
-          </div>
         </div>
 
-        {/* Mobile: Stats Below (mobile view) */}
-        <div className="lg:hidden px-6 pb-4 pt-2 border-t border-surface-100 flex gap-4">
-          <div className="flex-1 flex items-center gap-2">
-            <Video className="w-4 h-4 text-surface-500" />
-            <span className="text-xs font-semibold text-surface-500">Videos:</span>
-            <span className="text-sm font-bold text-surface-800">{totem.videoCount || 0}</span>
-          </div>
-          <div className="flex-1 flex items-center gap-2">
-            <ShoppingBag className="w-4 h-4 text-surface-500" />
-            <span className="text-xs font-semibold text-surface-500">Products:</span>
-            <span className="text-sm font-bold text-surface-800">{totem.productCount || 0}</span>
+        <div className="flex items-center gap-4 shrink-0">
+          <button 
+            onClick={confirmDelete}
+            className="p-4 rounded-2xl bg-slate-50 text-slate-400 hover:text-danger-500 hover:bg-danger-50 transition-all"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+          <div className="p-4 rounded-2xl bg-slate-900 text-white group-hover:bg-brand-500 transition-all shadow-xl shadow-slate-900/10 group-hover:shadow-brand-500/30">
+            <ChevronRight className="w-5 h-5" />
           </div>
         </div>
-
-        {/* handled via SweetAlert2 */}
       </div>
     );
   }
 
-  // Grid view (default)
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-white border border-surface-200 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:shadow-[0_10px_16px_rgba(15,23,42,0.08)] transition-all">
-      {/* Accent Header */}
-      <div className="h-1.5 w-full bg-brand-100 group-hover:bg-brand-500/20 transition-all" />
-      
-      <div className="p-5 flex flex-col h-full">
-        <div className="flex justify-between items-start mb-5">
-          <div className="space-y-1">
-            <h3 className="font-bold text-2xl text-surface-900 group-hover:text-surface-800 transition-colors leading-tight">
-              {totem.name || 'Unnamed Totem'}
-            </h3>
-            <p className="text-sm text-surface-600 font-medium">
-              Store ID: {totem.id_store}
-            </p>
+    <div 
+      onClick={() => navigate(`/totem/${totem.id}`)}
+      className="group card-premium overflow-hidden cursor-pointer relative bg-white border-slate-100 shadow-premium"
+    >
+      <div className="p-8 flex flex-col h-full">
+        {/* Card Header */}
+        <div className="flex justify-between items-start mb-10">
+          <div className="w-16 h-16 rounded-[1.75rem] bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm group-hover:scale-110 group-hover:shadow-xl group-hover:bg-white group-hover:border-brand-100 transition-all duration-500">
+            <Monitor className="w-7 h-7 text-brand-500" />
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-            <button
-              onClick={() => confirmDelete()}
-              className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-              title="Delete Totem"
+          <div className="flex gap-2">
+            <button 
+               onClick={confirmDelete}
+               className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-danger-500 hover:bg-danger-50 hover:border-danger-100 transition-all"
             >
               <Trash2 className="w-4 h-4" />
             </button>
+            <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+              <MoreVertical className="w-4 h-4" />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 mb-5">
-          <div className="bg-surface-100 p-3 rounded-xl border border-surface-200">
-            <div className="flex items-center gap-2 text-surface-500 mb-1">
-              <Video className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-semibold">Media</span>
-            </div>
-            <p className="text-lg font-bold text-surface-800 leading-none">
-              {(totem.videoCount !== undefined) ? totem.videoCount : '—'}
-            </p>
+        {/* Content */}
+        <div className="mb-10 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="px-3 py-1 rounded-full bg-success-500/5 border border-success-500/10 text-[9px] font-black text-success-600 uppercase tracking-widest flex items-center gap-1.5">
+              <Zap className="w-3 h-3 fill-success-500" />
+              Operational
+            </span>
           </div>
-          <div className="bg-surface-100 p-3 rounded-xl border border-surface-200">
-            <div className="flex items-center gap-2 text-surface-500 mb-1">
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span className="text-[10px] font-semibold">Items</span>
-            </div>
-            <p className="text-lg font-bold text-surface-800 leading-none">
-              {(totem.productCount !== undefined) ? totem.productCount : '—'}
-            </p>
+          <h3 className="text-3xl font-black text-slate-900 tracking-tighter leading-none group-hover:text-brand-500 transition-colors uppercase">
+            {totem.name || 'Unnamed Terminal'}
+          </h3>
+          <div className="flex items-center gap-2.5">
+             <div className="p-1 px-2 rounded-lg bg-slate-100 flex items-center gap-2">
+               <Terminal className="w-3.5 h-3.5 text-slate-400" />
+               <span className="text-[10px] font-black text-slate-500 tracking-widest uppercase">{totem.id_store || 'SN-X42'}</span>
+             </div>
+             <div className="flex items-center gap-1.5 px-2">
+               <ShieldCheck className="w-3.5 h-3.5 text-brand-400" />
+               <span className="text-[10px] font-black text-brand-400 uppercase tracking-widest">Secured</span>
+             </div>
           </div>
         </div>
 
-        <div className="mt-auto pt-4 border-t border-surface-200 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 shrink-0 border border-white shadow-sm uppercase">
-              {ownerInitial}
+        {/* Studio Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-10">
+          <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
+            <div className="flex items-center gap-3 text-slate-400 mb-3">
+              <div className="p-1.5 rounded-lg bg-indigo-50 text-indigo-500"><Video className="w-4 h-4" /></div>
+              <span className="text-[10px] font-black uppercase tracking-widest">Media</span>
             </div>
-            <div className="overflow-hidden">
-              <p className="text-xs font-semibold text-surface-800 truncate tracking-tight">
-                {ownerName || '—'}
-              </p>
-              <p className="text-xs font-medium text-surface-500 truncate tracking-tight">
-                {ownerEmail || '—'}
-              </p>
+            <p className="text-3xl font-black text-slate-900 tracking-tighter tabular-nums">{totem.videoCount || 0}</p>
+          </div>
+          <div className="bg-slate-50/50 p-5 rounded-[1.5rem] border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all duration-500">
+            <div className="flex items-center gap-3 text-slate-400 mb-3">
+              <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-500"><ShoppingBag className="w-4 h-4" /></div>
+              <span className="text-[10px] font-black uppercase tracking-widest">Assets</span>
             </div>
+            <p className="text-3xl font-black text-slate-900 tracking-tighter tabular-nums">{totem.productCount || 0}</p>
+          </div>
+        </div>
+
+        {/* Studio Footer Area */}
+        <div className="mt-auto pt-8 border-t border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-2xl bg-gradient-premium flex items-center justify-center text-white text-xs font-black ring-4 ring-brand-50 shadow-xl shadow-brand-500/20 uppercase">
+               {ownerInitial}
+             </div>
+             <div className="min-w-0">
+               <p className="text-[11px] font-black text-slate-900 truncate uppercase leading-none mb-1">{ownerName || 'System Admin'}</p>
+               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Primary Access</p>
+             </div>
           </div>
           
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            className="text-brand-600 hover:bg-brand-50 px-2! font-semibold"
-            onClick={() => navigate(`/totem/${totem.id}`)}
-          >
-            Manage <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
-          </Button>
+          <div className="w-12 h-12 rounded-2xl bg-slate-900 group-hover:bg-brand-500 text-white flex items-center justify-center transition-all shadow-xl shadow-slate-900/20 group-hover:shadow-brand-500/40">
+            <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+          </div>
         </div>
       </div>
-
-        {/* handled via SweetAlert2 */}
     </div>
   );
 };

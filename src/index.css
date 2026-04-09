@@ -1,88 +1,108 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-50: #e8f6f2;
-  --color-brand-100: #cfeee6;
-  --color-brand-500: #12715b;
-  --color-brand-600: #0f604e;
-  --color-brand-700: #0d4f41;
+  /* Studio Light & Sunset Palette */
+  --color-brand-50: #fff1f2;
+  --color-brand-100: #ffe4e6;
+  --color-brand-500: #f43f5e;
+  --color-brand-600: #e11d48;
+  --color-brand-700: #be123c;
+  
+  --color-accent-500: #fb923c;
+  --color-accent-600: #f97316;
 
-  --color-surface-50: #f7fafc;
-  --color-surface-100: #edf2f7;
-  --color-surface-200: #e2e8f0;
-  --color-surface-500: #a0aec0;
-  --color-surface-800: #2d3748;
-  --color-surface-900: #1a202c;
+  --color-surface-50: #f8fafc;
+  --color-surface-100: #ffffff;
+  --color-surface-200: #f1f5f9;
+  --color-surface-300: #e2e8f0;
+  --color-surface-400: #cbd5e1;
+  --color-surface-500: #94a3b8;
+  --color-surface-600: #64748b;
+  --color-surface-800: #1e293b;
+  --color-surface-900: #0f172a;
+
+  --color-success-500: #10b981;
+  --color-warning-500: #f59e0b;
+  --color-danger-500: #ef4444;
 
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --shadow-premium: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  --shadow-glass: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 @layer base {
   body {
-    background-color: var(--color-surface-50); /* Light gray background */
-    color: var(--color-surface-800);
+    background-color: var(--color-surface-50);
+    color: var(--color-surface-900);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
-  /* Custom Scrollbar */
   ::-webkit-scrollbar { width: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+  ::-webkit-scrollbar-track { background: var(--color-surface-50); }
+  ::-webkit-scrollbar-thumb { background: var(--color-surface-300); border-radius: 10px; border: 2px solid var(--color-surface-50); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-brand-500); }
 }
 
-@layer utilities {
-  .card-premium {
-    background: #ffffff;
-    border: 1px solid var(--color-surface-200);
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-    border-radius: 0.75rem;
-    transition: all 0.2s ease-in-out;
-  }
-  .card-premium:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-    border-color: var(--color-surface-500);
-  }
+@utility glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-glass);
+}
 
-  .nav-item-active {
-    background-color: var(--color-brand-500);
-    color: #ffffff;
-  }
-
-  /* Brand utility overrides to ensure Tailwind-like classes use the exact brand color */
-  .bg-brand-50 { background-color: rgba(18,113,91,0.06) !important; }
-  .bg-brand-100 { background-color: rgba(18,113,91,0.12) !important; }
-  .bg-brand-300 { background-color: rgba(18,113,91,0.18) !important; }
-  .bg-brand-500 { background-color: var(--color-brand-500) !important; }
-  .bg-brand-600 { background-color: var(--color-brand-600) !important; }
-  .bg-brand-600\/12 { background-color: rgba(15,96,78,0.12) !important; }
-  .bg-brand-500\/15 { background-color: rgba(18,113,91,0.15) !important; }
-
-  .text-brand-300 { color: rgba(18,113,91,0.6) !important; }
-  .text-brand-400 { color: rgba(18,113,91,0.85) !important; }
-  .text-brand-500 { color: var(--color-brand-500) !important; }
-  .text-brand-600 { color: var(--color-brand-600) !important; }
-
-  /* Gradient helpers (Tailwind style) */
-  .from-brand-600 { --tw-gradient-from: var(--color-brand-600) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)) !important; }
-  .to-brand-400 { --tw-gradient-to: rgba(18,113,91,0.85) !important; }
-  .from-brand-500\/20 { --tw-gradient-from: rgba(18,113,91,0.2) !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(0,0,0,0)) !important; }
-  .to-brand-700\/10 { --tw-gradient-to: rgba(13,79,65,0.1) !important; }
-
-  .border-brand-100 { border-color: rgba(18,113,91,0.12) !important; }
-  .border-brand-500\/20 { border-color: rgba(18,113,91,0.2) !important; }
-  .border-brand-300\/30 { border-color: rgba(18,113,91,0.3) !important; }
-
-  .shadow-brand-500\/20 { box-shadow: 0 6px 12px -4px rgba(18,113,91,0.2) !important; }
-  .shadow-brand-600\/20 { box-shadow: 0 6px 12px -4px rgba(15,96,78,0.2) !important; }
-  .shadow-brand-500\/30 { box-shadow: 0 8px 20px -6px rgba(18,113,91,0.3) !important; }
-
-  .animate-in {
-    animation: none !important;
+@utility card-premium {
+  background: var(--color-surface-100);
+  border: 1px solid var(--color-surface-200);
+  border-radius: 1.5rem;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover {
+    transform: translateY(-8px);
+    border-color: var(--color-brand-100);
+    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.08), 0 18px 36px -18px rgba(0, 0, 0, 0.03);
   }
 }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(10px); }
+@utility text-gradient {
+  background: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-accent-500) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@utility bg-gradient-premium {
+  background: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-accent-500) 100%);
+}
+
+@utility animate-slow-fade {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@utility btn-primary {
+  @apply bg-brand-500 text-white font-bold py-3 px-6 rounded-2xl transition-all active:scale-95 flex items-center gap-2;
+  background: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-accent-500) 100%);
+  &:hover {
+    box-shadow: 0 20px 25px -5px rgba(244, 63, 94, 0.2);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@utility animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@utility page-transition {
+  animation: fadeIn 0.5s ease-out;
 }

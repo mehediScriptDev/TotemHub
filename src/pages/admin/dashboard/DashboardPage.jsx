@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
-import { Plus, Search, Grid3x3, List, ShoppingBag, Trash2 } from 'lucide-react';
+import { Plus, Search, Grid3x3, List, RefreshCw, Layers, LayoutGrid, Filter, ArrowUpRight } from 'lucide-react';
 import { totemService } from '../../../services/totemService';
 import { Button, Spinner, EmptyState } from '../../../Components/ui';
-import Swal from 'sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
 import TotemCard from './component/TotemCard';
 import DashboardStats from './sections/DashboardStats';
 import { toast } from 'react-hot-toast';
@@ -13,6 +11,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [totems, setTotems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState(() => {
     try {
@@ -22,7 +21,7 @@ const DashboardPage = () => {
     }
   });
 
-  const itemsPerPage = 10;
+  const itemsPerPage = 12;
   const [currentPage, setCurrentPage] = useState(1);
 
   const handleViewModeChange = (mode) => {
@@ -34,16 +33,20 @@ const DashboardPage = () => {
     }
   };
 
-  const fetchTotems = useCallback(async () => {
+  const fetchTotems = useCallback(async (isRefresh = false) => {
     try {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      
       const data = await totemService.getAll();
       setTotems(Array.isArray(data) ? data : []);
+      if (isRefresh) toast.success('TERMINALS SYNCHRONIZED');
     } catch (err) {
-      toast.error('Failed to load access');
+      toast.error('SYNC PROTOCOL FAILURE');
       console.error(err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -55,6 +58,7 @@ const DashboardPage = () => {
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredTotems.length / itemsPerPage));
+  const paginatedTotems = filteredTotems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     if (currentPage > totalPages) setCurrentPage(totalPages);
@@ -64,268 +68,187 @@ const DashboardPage = () => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  const paginatedTotems = filteredTotems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
-  const handleDeleteClick = async (totem) => {
-    const result = await Swal.fire({
-      title: `Permanently remove "${totem.name}"?`,
-      text: 'This action is irreversible.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-      showLoaderOnConfirm: true,
-      preConfirm: async () => {
-        try {
-          await totemService.delete(totem.id);
-        } catch (err) {
-          Swal.showValidationMessage(`Request failed: ${err?.message || 'Failed to delete'}`);
-          throw err;
-        }
-      },
-      allowOutsideClick: () => !Swal.isLoading(),
-    });
-
-    if (result.isConfirmed) {
-      toast.success('Totem deleted');
-      fetchTotems();
-    }
-  };
-
-  // Helper to normalize owner info from different API/local shapes
-  const getOwner = (t) => {
-    const user = t.user || null;
-    const nameFromUser = user ? (user.first_name ? `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}` : (user.name || '')) : '';
-    const ownerName = nameFromUser || t.partnerEmail || '';
-    const ownerEmail = (user && (user.email || user.email_address)) || t.partnerEmail || '';
-    const ownerInitial = (
-      (user && (user.first_name?.charAt(0) || user.name?.charAt(0))) ||
-      (ownerName && ownerName.charAt(0)) ||
-      (t.name && t.name.charAt(0)) ||
-      'P'
-    ).toUpperCase();
-
-    return { ownerName, ownerEmail, ownerInitial };
-  };
-
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-3 sm:px-6 space-y-4 xl:space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight text-surface-900">Dashboard</h1>
-          <p className="mt-1 text-surface-600 font-medium">Manage and monitor all your digital signage totems</p>
+    <div className="w-full max-w-screen-2xl mx-auto space-y-12 animate-slow-fade pb-20">
+      {/* Studio Header Section */}
+      <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-10">
+        <div className="space-y-6">
+          <div className="flex items-center gap-6">
+             <div className="w-20 h-20 rounded-[2.5rem] bg-gradient-premium flex items-center justify-center shadow-2xl shadow-brand-500/30 transform -rotate-6">
+                <LayoutGrid className="w-10 h-10 text-white" />
+             </div>
+             <div className="space-y-1">
+               <h1 className="text-6xl font-black tracking-tighter text-slate-900 leading-none">
+                 STUDIO<span className="text-brand-500">MAX</span>
+               </h1>
+               <div className="flex items-center gap-4">
+                 <p className="text-slate-400 font-black text-xs uppercase tracking-[0.3em]">Operational Dashboard</p>
+                 <div className="w-1.5 h-1.5 rounded-full bg-slate-200" />
+                 <p className="text-brand-500 font-black text-xs uppercase tracking-[0.3em]">{totems.length} Devices Online</p>
+               </div>
+             </div>
+          </div>
         </div>
-        <Button
-          onClick={() => navigate('/totem/new')}
-          icon={Plus}
-          className="h-10 px-4 rounded-lg text-sm font-semibold shadow-md shadow-brand-500/20"
-        >
-          New Totem
-        </Button>
+
+        <div className="flex flex-wrap items-center gap-4">
+          <button 
+            onClick={() => fetchTotems(true)}
+            disabled={refreshing || loading}
+            className={`p-4 rounded-[1.5rem] bg-white border border-slate-100 shadow-premium hover:border-brand-500 text-slate-900 transition-all duration-500 ${refreshing ? 'animate-spin opacity-50' : 'hover:scale-110 active:scale-95'}`}
+          >
+            <RefreshCw className="w-6 h-6" />
+          </button>
+          
+          <div className="h-16 w-px bg-slate-100 mx-4 hidden xl:block" />
+
+          <button
+             onClick={() => navigate('/totem/new')}
+             className="group relative px-10 py-5 rounded-[2rem] bg-slate-900 overflow-hidden shadow-2xl shadow-slate-900/10 hover:shadow-brand-500/30 transition-all duration-500 hover:-translate-y-2 active:translate-y-0"
+          >
+            <div className="absolute inset-0 bg-gradient-premium opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative z-10 flex items-center gap-4">
+              <Plus className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-500" />
+              <span className="text-white font-black text-xs uppercase tracking-[0.2em]">Add Terminal</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       <DashboardStats totems={totems} />
 
-      {/* Actions & View Toggle */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-surface-100 p-3 rounded-xl border border-surface-200">
-        <div className="relative w-full sm:flex-1 sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-surface-500" />
+      {/* Control Station Bar */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-center bg-white border border-slate-100 p-6 rounded-[2.5rem] shadow-premium">
+        <div className="xl:col-span-6 relative group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
           <input
             type="text"
-            placeholder="Search totems..."
+            placeholder="FILTER TERMINALS BY IDENTITY..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 h-9 bg-white border border-surface-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-surface-500 text-surface-800"
+            className="w-full pl-16 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] text-[11px] font-black tracking-widest uppercase focus:bg-white focus:border-brand-500/30 focus:shadow-sm outline-none transition-all placeholder:text-slate-400/50 text-slate-900"
           />
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="hidden sm:block text-xs font-semibold text-surface-500">
-            {filteredTotems.length} totems
-          </div>
+        <div className="xl:col-span-3 flex items-center justify-center gap-3">
+           <div className="px-6 py-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+              <Filter className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Global Status: <span className="text-success-600">Stable</span></span>
+           </div>
+        </div>
 
-          <div className="inline-flex items-center gap-1 bg-white border border-surface-200 rounded-lg p-1">
+        <div className="xl:col-span-3 flex items-center justify-end gap-4">
+          <div className="flex bg-slate-50 rounded-[1.25rem] p-1.5 border border-slate-100">
             <button
-              type="button"
               onClick={() => handleViewModeChange('grid')}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                viewMode === 'grid'
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                  : 'text-surface-500 hover:text-surface-700 hover:bg-surface-50'
-              }`}
-              title="Grid view"
-              aria-label="Grid view"
-              aria-pressed={viewMode === 'grid'}
+              className={`p-3.5 rounded-xl transition-all duration-500 ${viewMode === 'grid' ? 'bg-white shadow-lg text-brand-500' : 'text-slate-400 hover:text-slate-900'}`}
             >
-              <Grid3x3 className="w-4 h-4" />
+              <Grid3x3 className="w-6 h-6" />
             </button>
             <button
-              type="button"
               onClick={() => handleViewModeChange('list')}
-              className={`p-2 rounded-md transition-all duration-200 ${
-                viewMode === 'list'
-                  ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                  : 'text-surface-500 hover:text-surface-700 hover:bg-surface-50'
-              }`}
-              title="List view"
-              aria-label="List view"
-              aria-pressed={viewMode === 'list'}
+              className={`p-3.5 rounded-xl transition-all duration-500 ${viewMode === 'list' ? 'bg-white shadow-lg text-brand-500' : 'text-slate-400 hover:text-slate-900'}`}
             >
-              <List className="w-4 h-4" />
+              <List className="w-6 h-6" />
             </button>
           </div>
         </div>
       </div>
 
+      {/* Main Studio View Area */}
       {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Spinner />
+        <div className="flex flex-col items-center justify-center py-40 space-y-8 animate-slow-fade">
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full border-4 border-slate-100 border-t-brand-500 animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+               <div className="w-4 h-4 bg-brand-500 rounded-full animate-pulse shadow-lg shadow-brand-500/40" />
+            </div>
+          </div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.5em] animate-pulse pl-2">Syncing Studio Core</p>
         </div>
       ) : filteredTotems.length > 0 ? (
-        <>
+        <div className="space-y-12">
           {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 xl:gap-4">
-              {paginatedTotems.map((totem) => (
-                <TotemCard key={totem.id} totem={totem} onDeleted={fetchTotems} viewMode={viewMode} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-10">
+              {paginatedTotems.map((totem, idx) => (
+                <div key={totem.id} style={{ animationDelay: `${idx * 100}ms` }} className="animate-slow-fade">
+                  <TotemCard totem={totem} onDeleted={fetchTotems} viewMode={viewMode} />
+                </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white border border-surface-200 rounded-2xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full table-fixed">
-                  <thead className="bg-surface-50">
-                    <tr className="text-left text-xs font-semibold text-surface-500 uppercase">
-                      <th className="px-6 py-3">Totem</th>
-                      <th className="px-6 py-3">Videos</th>
-                      <th className="px-6 py-3">Products</th>
-                      <th className="px-6 py-3">Owner</th>
-                      <th className="px-6 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-surface-100">
-                    {paginatedTotems.map((totem) => (
-                      <tr key={totem.id} className="hover:bg-surface-50">
-                        <td className="px-6 py-4 align-top">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full bg-surface-50 flex items-center justify-center shadow-sm">
-                              <ShoppingBag className="w-6 h-6 text-brand-600" />
-                            </div>
-                            <div>
-                              <div className="font-semibold text-surface-900">{totem.name || 'Unnamed Totem'}</div>
-                              <div className="text-xs text-surface-500">Store ID: {totem.id_store}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 align-top">
-                          <div className="text-sm font-semibold text-surface-800">{totem.videoCount ?? '—'}</div>
-                        </td>
-                        <td className="px-6 py-4 align-top">
-                          <div className="text-sm font-semibold text-surface-800">{totem.productCount ?? '—'}</div>
-                        </td>
-                        <td className="px-6 py-4 align-top">
-                          {(() => {
-                            const { ownerName, ownerEmail, ownerInitial } = getOwner(totem);
-                            return (
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-surface-100 flex items-center justify-center text-[10px] font-bold text-surface-600 uppercase">
-                                  {ownerInitial}
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="text-sm font-semibold text-surface-800 truncate">{ownerName || '—'}</div>
-                                  <div className="text-xs text-surface-500 truncate">{ownerEmail || '—'}</div>
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </td>
-                        <td className="px-6 py-4 align-top text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <Button size="sm" className="bg-brand-600 text-white" onClick={() => navigate(`/totem/${totem.id}`)}>Manage</Button>
-                            <button
-                              onClick={() => handleDeleteClick(totem)}
-                              className="p-2 text-surface-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                              title="Delete Totem"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+            <div className="space-y-4">
+              {paginatedTotems.map((totem, idx) => (
+                <div key={totem.id} style={{ animationDelay: `${idx * 50}ms` }} className="animate-slow-fade">
+                  <TotemCard totem={totem} onDeleted={fetchTotems} viewMode={viewMode} />
+                </div>
+              ))}
             </div>
           )}
 
+          {/* Large Studio Pagination */}
           {filteredTotems.length > itemsPerPage && (
-            <div className="mt-4">
-              <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-3">
-                <div className="text-sm text-surface-500">
-                  Showing {Math.min(filteredTotems.length, (currentPage - 1) * itemsPerPage + 1)} - {Math.min(filteredTotems.length, currentPage * itemsPerPage)} of {filteredTotems.length}
-                </div>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-10 pt-16 border-t border-slate-100">
+              <div className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] flex items-center gap-4">
+                <span className="text-slate-900 bg-white border border-slate-100 px-4 py-2 rounded-lg shadow-sm">Index {currentPage} / {totalPages}</span>
+                <span>Fleet Records: {filteredTotems.length}</span>
+              </div>
 
-                <div className="flex items-center gap-2">
-                  {/* Compact mobile controls */}
-                  <div className="flex items-center gap-2 sm:hidden">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="px-10 py-4 h-auto rounded-2xl border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-900 hover:border-brand-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Previous
+                </button>
+                <div className="flex gap-2 mx-4">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                     <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md border ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
+                      key={p}
+                      onClick={() => setCurrentPage(p)}
+                      className={`w-12 h-12 rounded-2xl border flex items-center justify-center text-[10px] font-black transition-all duration-500 ${p === currentPage ? 'bg-slate-900 border-slate-900 text-white shadow-xl shadow-slate-900/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}
                     >
-                      Prev
+                      {p}
                     </button>
-                    <div className="px-3 py-1 rounded-md border bg-white text-surface-700 text-sm">
-                      {currentPage}/{totalPages}
-                    </div>
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md border ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
-                    >
-                      Next
-                    </button>
-                  </div>
-
-                  {/* Full controls for larger screens */}
-                  <div className="hidden sm:inline-flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-md border ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
-                    >
-                      Prev
-                    </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => setCurrentPage(p)}
-                        className={`px-3 py-1 rounded-md border ${p === currentPage ? 'bg-brand-600 text-white' : 'bg-white text-surface-700 hover:bg-surface-50'}`}
-                      >
-                        {p}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-md border ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : 'hover:bg-surface-50'}`}
-                    >
-                      Next
-                    </button>
-                  </div>
+                  ))}
                 </div>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-10 py-4 h-auto rounded-2xl border border-slate-100 bg-white text-[10px] font-black uppercase tracking-widest text-slate-900 hover:border-brand-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                >
+                  Next
+                </button>
               </div>
             </div>
           )}
-        </>
+        </div>
       ) : (
-        <EmptyState
-          title={searchQuery ? 'No totems found' : 'No totems yet'}
-          description={searchQuery ? `We couldn't find any totems matching "${searchQuery}"` : 'Create your first totem to start managing digital signage content.'}
-          action={!searchQuery && { label: 'Create First Totem', onClick: () => navigate('/totem/new') }}
-        />
+        <div className="bg-white border border-slate-100 rounded-[3rem] p-24 lg:p-32 flex flex-col items-center justify-center text-center space-y-10 shadow-premium animate-slow-fade">
+          <div className="relative group">
+            <div className="absolute -inset-10 bg-brand-500/5 blur-3xl rounded-full group-hover:bg-brand-500/10 transition-all duration-700" />
+            <div className="relative w-32 h-32 rounded-[3rem] bg-slate-50 flex items-center justify-center border border-slate-100 shadow-2xl shadow-slate-900/5 transform transition-transform group-hover:rotate-12 duration-500">
+              <Monitor className="w-14 h-14 text-slate-300 opacity-50" />
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
+              {searchQuery ? 'RECORD NOT FOUND' : 'STUDIO FLEET EMPTY'}
+            </h3>
+            <p className="max-w-md text-slate-400 font-bold uppercase tracking-[0.2em] text-xs leading-loose opacity-60">
+              {searchQuery ? `Protocol failed to resolve identity matching "${searchQuery}". Check sequence and retry.` : 'Initialize the studio network by deploying your first terminal node to the cloud.'}
+            </p>
+          </div>
+          {!searchQuery && (
+             <button
+               onClick={() => navigate('/totem/new')}
+               className="bg-slate-900 hover:bg-slate-800 px-16 py-6 h-auto rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] text-white shadow-2xl shadow-slate-900/10 transition-all hover:-translate-y-2 flex items-center gap-4"
+             >
+               Deploy Source
+               <ArrowUpRight className="w-5 h-5" />
+             </button>
+          )}
+        </div>
       )}
     </div>
   );
