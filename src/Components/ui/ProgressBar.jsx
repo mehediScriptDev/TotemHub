@@ -10,16 +10,16 @@ const ProgressBar = ({ progress = 0, label = 'Uploading...', showPercent = true 
   return (
     <div className="w-full space-y-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs font-medium text-surface-400">{label}</span>
+        <span className="text-xs font-medium text-surface-600">{label}</span>
         {showPercent && (
-          <span className="text-xs font-semibold text-brand-400">
+          <span className="text-xs font-semibold text-brand-600">
             {clampedProgress}%
           </span>
         )}
       </div>
-      <div className="w-full h-2 bg-surface-800 rounded-full overflow-hidden">
+      <div className="w-full h-2 bg-surface-200 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-300 ease-out"
+          className="h-full bg-linear-to-r from-brand-600 to-brand-400 rounded-full transition-all duration-300 ease-out"
           style={{ width: `${clampedProgress}%` }}
         />
       </div>

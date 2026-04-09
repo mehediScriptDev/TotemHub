@@ -6,8 +6,10 @@ export const API_CONFIG = {
 
 // Local Storage Keys
 export const STORAGE_KEYS = {
-  TOKEN: "totem_auth_token",
+  TOKEN: import.meta.env.VITE_STORAGE_KEY || "totem_auth_token",
   USER: "totem_auth_user",
+  ADMIN_EMAIL: "totem_auth_admin_email",
+  ADMIN_PASSWORD: "totem_auth_admin_password",
 };
 
 // Video Categories
