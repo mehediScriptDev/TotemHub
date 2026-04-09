@@ -40,9 +40,9 @@ const Input = forwardRef(
             className={`
               w-full rounded-xl bg-surface-800/80 border text-surface-100
               placeholder:text-surface-500 transition-all duration-200
-              focus-ring text-sm
+              focus-ring text-xs
               ${Icon ? 'pl-10 pr-4' : 'px-4'}
-              py-2.5
+              py-2
               ${
                 error
                   ? 'border-danger-500 focus:border-danger-500'

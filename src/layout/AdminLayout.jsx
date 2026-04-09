@@ -3,16 +3,18 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import { 
   LayoutDashboard, 
   PlusCircle, 
-  LogOut, 
   Menu, 
-  X, 
+  Search,
   ChevronRight, 
-  Zap,
   Bell,
-  Settings
+  Settings,
+  Video,
+  Globe,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import ScrollToTop from '../Components/utility/ScrollToTop';
+import SidebarLayout from './SidebarLayout';
 
 const AdminLayout = () => {
   const { user, logout } = useAuth();
@@ -22,7 +24,8 @@ const AdminLayout = () => {
 
   const navItems = [
     { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { label: 'Create Totem', path: '/totem/new', icon: PlusCircle },
+    { label: 'Deployment', path: '/totem/new', icon: PlusCircle },
+    { label: 'Media Library', path: '/videos', icon: Video },
   ];
 
   const handleLogout = () => {
@@ -31,116 +34,100 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-surface-50">
+    <div className="flex min-h-screen bg-[#F8FAF1] text-slate-900 overflow-hidden">
       <ScrollToTop />
-      
-      {/* Mobile Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 z-40 bg-surface-900/10 backdrop-blur-sm lg:hidden" 
-          onClick={() => setIsSidebarOpen(false)} 
-        />
-      )}
 
-      {/* --- SIDEBAR --- */}
-      <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-surface-900 border-r border-surface-800 shadow-sm transition-transform duration-300 lg:translate-x-0
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-      `}>
-        <div className="flex flex-col h-full">
-          {/* Logo Area */}
-          <div className="p-8 flex items-center gap-3 border-b border-surface-800">
-            <div className="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center shadow-lg shadow-brand-500/20">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-white tracking-tight leading-none uppercase">TotemHub</h1>
-              <p className="text-[10px] font-bold text-surface-500 tracking-widest leading-none mt-1 uppercase">Management</p>
-            </div>
-          </div>
+      {/* Modern Background Decorations */}
+      <div className="fixed top-0 right-0 w-[800px] h-[800px] bg-brand-500/5 blur-[120px] rounded-full -z-10 animate-pulse pointer-events-none" />
+      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-accent-500/5 blur-[100px] rounded-full -z-10 pointer-events-none" />
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setIsSidebarOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-xl transition-all group relative
-                    ${isActive 
-                      ? 'bg-brand-500 text-white' 
-                      : 'text-surface-500 hover:bg-surface-800 hover:text-white'}
-                  `}
-                >
-                  <item.icon className={`w-5 h-5 ${isActive ? 'text-brand-600' : 'text-surface-400 group-hover:text-surface-600'}`} />
-                  <span className="font-bold tracking-tight">{item.label}</span>
-                  {isActive && (
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-l-full bg-brand-500" />
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* User Section */}
-          <div className="p-6 border-t border-surface-800 space-y-4">
-            <div className="flex items-center gap-3 px-3 py-3 bg-surface-800 rounded-xl border border-surface-800">
-              <div className="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-white font-black text-sm border-2 border-surface-900 shadow-sm">
-                {user?.name?.charAt(0) || 'A'}
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-xs font-black text-white truncate">Senior Admin</p>
-                <p className="text-[10px] text-surface-500 font-bold truncate tracking-tight">{user?.email || 'admin@totem.com'}</p>
-              </div>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all group font-bold tracking-tight"
-            >
-              <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-      </aside>
+      <SidebarLayout
+        isSidebarOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+        navItems={navItems}
+        pathname={location.pathname}
+        user={user}
+        onLogout={handleLogout}
+      />
 
       {/* --- MAIN CONTENT --- */}
-      <main className="flex-1 flex flex-col min-w-0 min-h-screen lg:pl-72">
+      <main className="flex-1 flex flex-col min-w-0 min-h-screen lg:pl-72 relative">
+        
         {/* Topbar */}
-        <header className="h-16 bg-white/95 backdrop-blur-md border-b border-surface-200 flex items-center justify-between px-6 sticky top-0 z-30">
-          <div className="flex items-center gap-4">
+        <header className="h-24 bg-white/80 backdrop-blur-2xl border-b border-slate-100 flex items-center justify-between px-8 sm:px-12 sticky top-0 z-30">
+          <div className="flex items-center gap-8">
             <button 
-              className="lg:hidden p-2 hover:bg-surface-100 rounded-lg transition-colors" 
+              className="lg:hidden p-3 hover:bg-slate-50 rounded-2xl transition-colors text-slate-900" 
               onClick={() => setIsSidebarOpen(true)}
             >
-              <Menu className="w-6 h-6 text-surface-600" />
+              <Menu className="w-6 h-6" />
             </button>
 
-            <nav className="hidden sm:flex items-center gap-2 text-[10px] font-black text-surface-500 uppercase tracking-widest">
-              <Link to="/" className="hover:text-brand-600 transition-colors">TotemHub</Link>
-              <ChevronRight className="w-3.5 h-3.5" />
-              <span className="text-surface-800">{location.pathname === '/' ? 'Dashboard' : 'Management'}</span>
+            <div className="hidden md:flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-2.5 w-96 group focus-within:bg-white focus-within:shadow-lg focus-within:border-brand-500/20 transition-all duration-300">
+              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-brand-500" />
+              <input 
+                type="text" 
+                placeholder="Search archives..." 
+                className="bg-transparent border-none outline-none text-sm w-full text-slate-900 placeholder:text-slate-400 font-medium" 
+              />
+            </div>
+
+            <nav className="hidden xl:flex items-center gap-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+              <Link to="/" className="hover:text-brand-500 transition-colors">OS</Link>
+              <ChevronRight className="w-3 h-3 opacity-30" />
+              <span className="text-slate-900">
+                {location.pathname === '/' ? 'Overview' : 
+                 location.pathname.includes('/totem/') ? 'Terminal' : 
+                 location.pathname === '/videos' ? 'Assets' : 'System'}
+              </span>
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button className="p-2 text-surface-500 hover:text-surface-800 hover:bg-surface-100 rounded-lg transition-all relative">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-            </button>
-            <button className="p-2 text-surface-500 hover:text-surface-800 hover:bg-surface-100 rounded-lg transition-all">
-              <Settings className="w-5 h-5" />
-            </button>
+          <div className="flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-50 border border-slate-100 text-slate-900 text-[10px] font-black tracking-widest uppercase">
+              <Globe className="w-3.5 h-3.5 text-brand-500" />
+              Sync Active
+            </div>
+
+            <div className="h-10 w-px bg-slate-100 mx-2" />
+
+            <div className="flex items-center gap-2">
+              <button className="p-3 text-slate-400 hover:text-brand-500 hover:bg-slate-50 rounded-2xl transition-all relative group">
+                <Bell className="w-5.5 h-5.5" />
+                <span className="absolute top-3 right-3 w-2 h-2 bg-brand-500 rounded-full border-2 border-white group-hover:scale-125 transition-transform shadow-lg shadow-brand-500/40"></span>
+              </button>
+              
+              <a 
+                href="https://totemmax.io" 
+                target="_blank" 
+                rel="noreferrer"
+                className="hidden sm:flex items-center gap-2 ml-4 px-5 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-black transition-all shadow-xl shadow-slate-900/10"
+              >
+                <span>Live View</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <section className="flex-1 p-4 lg:p-10">
+        <section className="flex-1 p-8 sm:p-12 lg:p-16 overflow-x-hidden page-transition">
           <Outlet />
         </section>
+
+        {/* Footer info (Premium Studio) */}
+        <footer className="px-12 py-8 border-t border-slate-100 text-[10px] font-black text-slate-400 tracking-widest uppercase flex flex-col sm:flex-row justify-between items-center gap-6 bg-white">
+          <div className="flex items-center gap-3">
+             <div className="w-6 h-6 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center font-black text-slate-900">T</div>
+             <span>© 2024 TOTEMMAX STUDIO PLATFORM</span>
+          </div>
+          <div className="flex gap-8">
+            <span className="hover:text-brand-500 cursor-pointer transition-colors border-b border-transparent hover:border-brand-500">Resource Hub</span>
+            <span className="hover:text-brand-500 cursor-pointer transition-colors border-b border-transparent hover:border-brand-500">Cloud Status</span>
+            <span className="text-slate-200">|</span>
+            <span className="text-slate-900 tracking-normal font-bold lowercase">v2.4.0-stable</span>
+          </div>
+        </footer>
       </main>
     </div>
   );

@@ -1,52 +1,69 @@
 import React from 'react';
-import { Layers, Activity, Video, ShoppingBag } from 'lucide-react';
+import { Activity, Video, ShoppingBag, Terminal, Monitor, ArrowUpRight, TrendingUp } from 'lucide-react';
 
-const StatCard = ({ label, value, icon: Icon, colorClass }) => (
-  <div className="bg-white p-6 rounded-2xl border border-surface-200 shadow-sm hover:shadow-md transition-all animate-in flex items-center justify-between group">
-    <div className="space-y-1">
-      <p className="text-[10px] font-black text-surface-500 uppercase tracking-widest leading-none group-hover:text-surface-800 transition-colors">
-        {label}
-      </p>
-      <p className="text-3xl font-black text-surface-800 leading-none tabular-nums">
+const StatCard = ({ label, value, icon: Icon, color, trend }) => (
+  <div className="relative group card-premium p-6 flex flex-col justify-between h-full bg-white border-slate-100 hover:border-brand-100 shadow-premium">
+    <div className="flex items-start justify-between mb-6">
+      <div className={`p-3 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-lg transition-all duration-500`}>
+        <Icon className={`w-6 h-6 ${color}`} strokeWidth={2} />
+      </div>
+      {trend && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-500/10 text-success-600 text-[8px] font-black uppercase tracking-widest">
+          <TrendingUp className="w-3 h-3" />
+          <span>{trend}%</span>
+        </div>
+      )}
+    </div>
+    
+    <div>
+      <h3 className="text-4xl font-black text-slate-900 mb-2 tabular-nums tracking-tighter">
         {value}
-      </p>
+      </h3>
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
+          {label}
+        </p>
+        <ArrowUpRight className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+      </div>
     </div>
-    <div className={`p-3 rounded-xl ${colorClass} bg-opacity-10 text-opacity-100 flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg shadow-brand-500/5`}>
-      <Icon className="w-6 h-6 " />
-    </div>
+
+    {/* Subtle design element */}
+    <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-premium opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-b-full" />
   </div>
 );
 
 const DashboardStats = ({ totems = [] }) => {
   const stats = [
     {
-      label: 'Total Totems',
+      label: 'Active Terminals',
       value: totems.length,
-      icon: Layers,
-      colorClass: 'bg-brand-500 text-brand-600',
+      icon: Monitor,
+      color: 'text-brand-500',
+      trend: 12
     },
     {
-      label: 'Active Partners',
+      label: 'Partner Network',
       value: new Set(totems.map((t) => t.user?.email || t.partnerEmail).filter(Boolean)).size,
       icon: Activity,
-      colorClass: 'bg-green-500 text-green-600',
+      color: 'text-accent-500',
     },
     {
-      label: 'Total Videos',
+      label: 'Media Assets',
       value: totems.reduce((acc, t) => acc + (t.videoCount || 0), 0),
       icon: Video,
-      colorClass: 'bg-amber-500 text-amber-600',
+      color: 'text-indigo-500',
+      trend: 8
     },
     {
-      label: 'Showcase Items',
+      label: 'Catalog Items',
       value: totems.reduce((acc, t) => acc + (t.productCount || 0), 0),
       icon: ShoppingBag,
-      colorClass: 'bg-indigo-500 text-indigo-600',
+      color: 'text-emerald-500',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
       {stats.map((stat, i) => (
         <StatCard key={i} {...stat} />
       ))}
