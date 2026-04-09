@@ -88,7 +88,7 @@ const CreateTotemPage = () => {
         <div className="flex items-center gap-10">
           <button
             onClick={() => navigate('/')}
-            className="w-20 h-20 flex items-center justify-center rounded-[2rem] bg-white border border-slate-100 text-slate-400 hover:text-brand-500 hover:border-brand-500 transition-all duration-500 group shadow-premium"
+            className="w-20 h-20 flex items-center justify-center rounded-4xl bg-white border border-slate-100 text-slate-400 hover:text-brand-500 hover:border-brand-500 transition-all duration-500 group shadow-premium"
           >
             <ArrowLeft className="w-8 h-8 group-hover:-translate-x-2 transition-transform" />
           </button>
@@ -98,7 +98,7 @@ const CreateTotemPage = () => {
           </div>
         </div>
         
-        <div className="px-8 py-4 rounded-[1.5rem] bg-white border border-slate-100 flex items-center gap-6 shadow-premium">
+        <div className="px-8 py-4 rounded-3xl bg-white border border-slate-100 flex items-center gap-6 shadow-premium">
            <div className="p-3 rounded-2xl bg-brand-50 transition-colors group-hover:bg-brand-100"><Cpu className="w-7 h-7 text-brand-500" /></div>
            <div className="space-y-0.5">
              <p className="text-[11px] font-black text-slate-900 uppercase tracking-widest leading-tight">Handshake Mode</p>
@@ -110,7 +110,7 @@ const CreateTotemPage = () => {
       <div className="grid grid-cols-1 gap-12">
         <div className="bg-white border border-slate-100 rounded-[3.5rem] p-10 lg:p-20 shadow-premium relative overflow-hidden group">
           {/* Subtle decoration */}
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+          <div className="absolute top-0 right-0 w-150 h-150 bg-brand-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
           
           <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -125,7 +125,7 @@ const CreateTotemPage = () => {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="E.G. TERMINAL-72-BETA"
                   required
-                  className="w-full h-24 px-10 bg-slate-50 border border-slate-100 rounded-[2rem] text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl outline-none transition-all duration-500"
+                  className="w-full h-24 px-10 bg-slate-50 border border-slate-100 rounded-4xl text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl outline-none transition-all duration-500"
                 />
                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em] pl-4 opacity-60 flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-accent-500" />
@@ -149,7 +149,7 @@ const CreateTotemPage = () => {
                     onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearchPartner())}
                     placeholder="UPLINK@ACCOUNT.COM"
                     required
-                    className={`w-full h-24 px-10 pr-40 bg-slate-50 border rounded-[2rem] text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 outline-none transition-all duration-500 ${partnerUser ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-slate-100 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl'}`}
+                    className={`w-full h-24 px-10 pr-40 bg-slate-50 border rounded-4xl text-slate-900 font-black text-xl tracking-widest placeholder:text-slate-200 outline-none transition-all duration-500 ${partnerUser ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-slate-100 focus:bg-white focus:border-brand-500/20 focus:shadow-2xl'}`}
                   />
                   <button
                     type="button"
@@ -176,7 +176,7 @@ const CreateTotemPage = () => {
             {/* Strategy Card */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-10 bg-slate-50/50 p-8 lg:p-12 rounded-[3rem] border border-slate-100 group-hover:bg-white group-hover:shadow-xl transition-all duration-700">
               <div className="md:col-span-3 lg:col-span-2 flex justify-center">
-                 <div className="w-24 h-24 rounded-[2rem] bg-white flex items-center justify-center border border-slate-100 shadow-2xl relative">
+                 <div className="w-24 h-24 rounded-4xl bg-white flex items-center justify-center border border-slate-100 shadow-2xl relative">
                     <Monitor className="w-10 h-10 text-brand-500" />
                     <div className="absolute top-0 right-0 w-3 h-3 bg-brand-500 rounded-full animate-ping" />
                  </div>
@@ -193,7 +193,7 @@ const CreateTotemPage = () => {
               <button
                 type="button"
                 onClick={() => navigate('/')}
-                className="w-full sm:w-auto px-16 py-6 h-auto rounded-[2rem] border border-slate-100 bg-white text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-slate-50 hover:text-slate-900 transition-all duration-500"
+                className="w-full sm:w-auto px-16 py-6 h-auto rounded-4xl border border-slate-100 bg-white text-slate-400 text-[11px] font-black uppercase tracking-[0.4em] hover:bg-slate-50 hover:text-slate-900 transition-all duration-500"
               >
                 Abort Sequence
               </button>
@@ -202,7 +202,7 @@ const CreateTotemPage = () => {
                 <button
                   type="submit"
                   disabled={!isCreateEnabled}
-                  className="w-full sm:w-[400px] h-24 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl shadow-slate-900/10 disabled:opacity-30 transition-all duration-500 group/inner relative overflow-hidden"
+                  className="w-full sm:w-100 h-24 bg-slate-900 hover:bg-slate-800 text-white font-black uppercase tracking-[0.5em] rounded-[2.5rem] shadow-2xl shadow-slate-900/10 disabled:opacity-30 transition-all duration-500 group/inner relative overflow-hidden"
                 >
                   <div className="absolute inset-0 bg-gradient-premium opacity-0 group-hover/inner:opacity-100 transition-opacity duration-700" />
                   {loading ? (

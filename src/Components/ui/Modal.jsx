@@ -81,23 +81,23 @@ const Modal = ({
       >
         {/* Header */}
         {title && (
-          <div className={`flex items-center justify-between px-6 py-4 border-b ${headerBorderClasses}`}>
-            <h3 className={`text-lg font-semibold ${titleClasses}`}>{title}</h3>
+          <div className={`flex items-center justify-between px-5 py-3 border-b ${headerBorderClasses}`}>
+            <h3 className={`text-base font-semibold ${titleClasses}`}>{title}</h3>
             <button
               onClick={onClose}
               className={closeBtnClasses}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Body */}
-        <div className="px-6 py-4">{children}</div>
+        <div className="px-5 py-3">{children}</div>
 
         {/* Footer */}
         {footer && (
-          <div className={`flex items-center justify-end gap-3 px-6 py-4 border-t ${headerBorderClasses}`}>
+          <div className={`flex items-center justify-end gap-3 px-5 py-3 border-t ${headerBorderClasses}`}>
             {footer}
           </div>
         )}

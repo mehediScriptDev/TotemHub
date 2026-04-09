@@ -19,9 +19,9 @@ const VARIANT_CLASSES = {
 };
 
 const SIZE_CLASSES = {
-  sm: 'px-4 py-2 text-[10px] font-black uppercase tracking-widest gap-2',
-  md: 'px-6 py-3 text-[11px] font-black uppercase tracking-[0.15em] gap-3',
-  lg: 'px-10 py-4 text-xs font-black uppercase tracking-[0.2em] gap-4',
+  sm: 'px-2 py-0.5 text-xs gap-1',
+  md: 'px-3 py-1 text-xs gap-1',
+  lg: 'px-3 py-1.5 text-sm gap-1.5',
 };
 
 const Button = ({
