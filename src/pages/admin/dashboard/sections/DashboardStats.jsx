@@ -2,25 +2,25 @@ import React from 'react';
 import { Activity, Video, ShoppingBag, Terminal, Monitor, ArrowUpRight, TrendingUp } from 'lucide-react';
 
 const StatCard = ({ label, value, icon: Icon, color, trend }) => (
-  <div className="relative group card-premium p-8 flex flex-col justify-between h-full bg-white border-slate-100 hover:border-brand-100 shadow-premium">
-    <div className="flex items-start justify-between mb-8">
-      <div className={`p-4 rounded-[1.5rem] bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-lg transition-all duration-500`}>
-        <Icon className={`w-8 h-8 ${color}`} strokeWidth={2} />
+  <div className="relative group card-premium p-6 flex flex-col justify-between h-full bg-white border-slate-100 hover:border-brand-100 shadow-premium">
+    <div className="flex items-start justify-between mb-6">
+      <div className={`p-3 rounded-lg bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-lg transition-all duration-500`}>
+        <Icon className={`w-6 h-6 ${color}`} strokeWidth={2} />
       </div>
       {trend && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-success-500/10 text-success-600 text-[10px] font-black uppercase tracking-widest">
-          <TrendingUp className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-500/10 text-success-600 text-[8px] font-black uppercase tracking-widest">
+          <TrendingUp className="w-3 h-3" />
           <span>{trend}%</span>
         </div>
       )}
     </div>
     
     <div>
-      <h3 className="text-5xl font-black text-slate-900 mb-2 tabular-nums tracking-tighter">
+      <h3 className="text-4xl font-black text-slate-900 mb-2 tabular-nums tracking-tighter">
         {value}
       </h3>
       <div className="flex items-center gap-2">
-        <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
           {label}
         </p>
         <ArrowUpRight className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
